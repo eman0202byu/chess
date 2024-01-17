@@ -10,7 +10,28 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
+    ChessGame.TeamColor team = null;
+    PieceType identity = null;
+
+    private static boolean isValidTeam(String input) {
+        for (ChessGame.TeamColor main_body : ChessGame.TeamColor.values()) {
+            if (main_body.name().equals(input)) {
+                return true;
+            }
+        }
+        return false;
+    }
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        if (isValidTeam(pieceColor.toString())){
+            team = pieceColor;
+        }else{
+            throw new RuntimeException("Invalid pieceColor upon instantiation of ChessPiece Constructor");
+        }
+        if(isValidType(type.toString())){
+            identity = type;
+        }else{
+            throw new RuntimeException("Invalid PieceType upon instantiation of ChessPiece Constructor");
+        }
     }
 
     /**
@@ -25,11 +46,24 @@ public class ChessPiece {
         PAWN
     }
 
+    private static boolean isValidType(String input) {
+        for (PieceType main_body : PieceType.values()) {
+            if (main_body.name().equals(input)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        if (team != null) {
+            return team;
+        }else {
+            throw new RuntimeException("ERROR, Team Color has not been initialized yet.");
+        }
     }
 
     /**
