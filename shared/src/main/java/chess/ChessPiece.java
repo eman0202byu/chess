@@ -1,5 +1,6 @@
 package chess;
 
+import java.math.BigInteger;
 import java.util.Collection;
 
 /**
@@ -12,26 +13,11 @@ public class ChessPiece {
 
     ChessGame.TeamColor team = null;
     PieceType identity = null;
+    BigInteger moves = new BigInteger("0");
 
-    private static boolean isValidTeam(String input) {
-        for (ChessGame.TeamColor main_body : ChessGame.TeamColor.values()) {
-            if (main_body.name().equals(input)) {
-                return true;
-            }
-        }
-        return false;
-    }
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        if (isValidTeam(pieceColor.toString())){
-            team = pieceColor;
-        }else{
-            throw new RuntimeException("Invalid pieceColor upon instantiation of ChessPiece Constructor");
-        }
-        if(isValidType(type.toString())){
-            identity = type;
-        }else{
-            throw new RuntimeException("Invalid PieceType upon instantiation of ChessPiece Constructor");
-        }
+        identity = type;
+        team = pieceColor;
     }
 
     /**
@@ -44,15 +30,6 @@ public class ChessPiece {
         KNIGHT,
         ROOK,
         PAWN
-    }
-
-    private static boolean isValidType(String input) {
-        for (PieceType main_body : PieceType.values()) {
-            if (main_body.name().equals(input)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
