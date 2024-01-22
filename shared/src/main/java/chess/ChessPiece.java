@@ -2,6 +2,7 @@ package chess;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Represents a single chess piece
@@ -13,11 +14,22 @@ public class ChessPiece {
 
     ChessGame.TeamColor team = null;
     PieceType identity = null;
-    BigInteger moves = new BigInteger("0");
+    long moves = 0;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         identity = type;
         team = pieceColor;
+    }
+
+    public void SetMoves(long value){
+        moves = value;
+    }
+    public void IterateMoves(){
+        moves = (moves + 1);
+    }
+
+    public long GetMoves(){
+        return moves;
     }
 
     /**
@@ -47,7 +59,7 @@ public class ChessPiece {
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return identity;
     }
 
     /**
@@ -58,6 +70,16 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessBoard currBoard = board;
+        ChessPosition currPos = myPosition;
+        var currPiece = board.getPiece(myPosition);
+
+        if(currPiece != null){
+            //implement movement somehow...
+        }else{
+            return new HashSet<>();
+        }
+
+        throw new RuntimeException("Not implemented" + "\nFatal error: ChessPiece.pieceMoves(Scope_Broken)");
     }
 }
