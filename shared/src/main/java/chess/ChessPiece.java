@@ -21,14 +21,15 @@ public class ChessPiece {
         team = pieceColor;
     }
 
-    public void SetMoves(long value){
+    public void SetMoves(long value) {
         moves = value;
     }
-    public void IterateMoves(){
+
+    public void IterateMoves() {
         moves = (moves + 1);
     }
 
-    public long GetMoves(){
+    public long GetMoves() {
         return moves;
     }
 
@@ -50,7 +51,7 @@ public class ChessPiece {
     public ChessGame.TeamColor getTeamColor() {
         if (team != null) {
             return team;
-        }else {
+        } else {
             throw new RuntimeException("ERROR, Team Color has not been initialized yet.");
         }
     }
@@ -74,12 +75,11 @@ public class ChessPiece {
         ChessPosition currPos = myPosition;
         var currPiece = board.getPiece(myPosition);
 
-        if(currPiece != null){
-            //implement movement somehow...
-        }else{
+        if (currPiece != null) {
+            return Rules.MovementRule(currBoard, currPos, currPiece);
+        } else {
             return new HashSet<>();
         }
-
-        throw new RuntimeException("Not implemented" + "\nFatal error: ChessPiece.pieceMoves(Scope_Broken)");
+        //throw new RuntimeException("Not implemented" + "\nFatal error: ChessPiece.pieceMoves(Scope_Broken)");
     }
 }

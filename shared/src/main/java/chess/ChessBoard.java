@@ -9,8 +9,13 @@ package chess;
 public class ChessBoard {
 
     ChessPiece[][] squares = new ChessPiece[8][8];
+
     public ChessBoard() {
-        
+
+    }
+
+    public ChessPiece[][] getBoard() {
+        return squares;
     }
 
     /**
