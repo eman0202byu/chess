@@ -181,6 +181,9 @@ public class Rules {
                 if (field[newRow][newCol] == null) {
                     out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                     newCol += i;
+                }else if(field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
+                    out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
+                    newCol = 99;
                 }else{
                     newCol = 19;
                 }
@@ -196,6 +199,9 @@ public class Rules {
                 if (field[newRow][newCol] == null) {
                 out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                 newRow += i;
+                }else if(field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
+                    out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
+                    newCol = 99;
                 }else{
                     newRow = 91;
                 }
