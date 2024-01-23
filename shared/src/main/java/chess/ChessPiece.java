@@ -3,6 +3,7 @@ package chess;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -81,5 +82,18 @@ public class ChessPiece {
             return new HashSet<>();
         }
         //throw new RuntimeException("Not implemented" + "\nFatal error: ChessPiece.pieceMoves(Scope_Broken)");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return moves == that.moves && team == that.team && identity == that.identity;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(team, identity, moves);
     }
 }

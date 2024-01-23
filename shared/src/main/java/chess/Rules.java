@@ -30,32 +30,51 @@ public class Rules {
         }
     }
 
-    //// Hey that one TA looking at my code, I big banged all this, it will probably need to be completely re-written
-    //// when I am not pulling an all-nighter. You know, implementing things is always harder than thinking about them.
     public static HashSet<ChessMove> BishopMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
-        HashSet<ChessMove> out = null;
+        var field = board.getBoard();
+        HashSet<ChessMove> out = new HashSet<ChessMove>();
 
         ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
 
         // top-left to bottom-right
-        for (int i = 1; currPos.getRow() + i < 8 && currPos.getColumn() + i < 8; i++) {
-            out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() + i, currPos.getColumn() + i)));
+        for (int i = 1; currPos.getArrayRow() + i < 8 && currPos.getArrayColumn() + i < 8; i++) {
+            if (field[(currPos.getArrayRow() + i)][(currPos.getArrayColumn() + i)] == null) {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() + i, currPos.getColumn() + i)));
+            } else {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() + i, currPos.getColumn() + i)));
+                break;
+            }
         }
 
         // top-right to bottom-left
-        for (int i = 1; currPos.getRow() - i >= 0 && currPos.getColumn() + i < 8; i++) {
-            out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() - i, currPos.getColumn() + i)));
+        for (int i = 1; currPos.getArrayRow() - i >= 0 && currPos.getArrayColumn() + i < 8; i++) {
+            if (field[(currPos.getArrayRow() - i)][(currPos.getArrayColumn() + i)] == null) {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() - i, currPos.getColumn() + i)));
+            } else {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() - i, currPos.getColumn() + i)));
+                break;
+            }
         }
 
         // bottom-left to top-right
-        for (int i = 1; currPos.getRow() + i < 8 && currPos.getColumn() - i >= 0; i++) {
-            out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() + i, currPos.getColumn() - i)));
+        for (int i = 1; currPos.getArrayRow() + i < 8 && currPos.getArrayColumn() - i >= 0; i++) {
+            if (field[(currPos.getArrayRow() + i)][(currPos.getArrayColumn() - i)] == null) {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() + i, currPos.getColumn() - i)));
+            } else {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() + i, currPos.getColumn() - i)));
+                break;
+            }
         }
 
         // bottom-right to top-left
-        for (int i = 1; currPos.getRow() - i >= 0 && currPos.getColumn() - i >= 0; i++) {
-            out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() - i, currPos.getColumn() - i)));
+        for (int i = 1; currPos.getArrayRow() - i >= 0 && currPos.getArrayColumn() - i >= 0; i++) {
+            if (field[(currPos.getArrayRow() - i)][(currPos.getArrayColumn() - i)] == null) {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() - i, currPos.getColumn() - i)));
+            } else {
+                out.add(new ChessMove(currPos, new ChessPosition(currPos.getRow() - i, currPos.getColumn() - i)));
+                break;
+            }
         }
 
         return out;
@@ -63,7 +82,7 @@ public class Rules {
 
     public static HashSet<ChessMove> KingMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
-        HashSet<ChessMove> out = null;
+        HashSet<ChessMove> out = new HashSet<ChessMove>();
 
         ////-NOTE: This one is simple, so I am probably fine, but check implementation
 
@@ -84,7 +103,8 @@ public class Rules {
 
     public static HashSet<ChessMove> QueenMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
-        HashSet<ChessMove> out = new HashSet<>();
+        var field = board.getBoard();
+        HashSet<ChessMove> out = new HashSet<ChessMove>();
 
         // Col and Row moves simultaneously
         for (int i = -1; i <= 1; i++) {
@@ -92,10 +112,12 @@ public class Rules {
                 if (i != 0 || j != 0) { // Skip starting
                     int newRow = currPos.getRow() + i;
                     int newCol = currPos.getColumn() + j;
-                    while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                        out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
-                        newRow += i;
-                        newCol += j;
+                    if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                        do {
+                            out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+                            newRow += i;
+                            newCol += j;
+                        } while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && field[i][j] == null);
                     }
                 }
             }
@@ -106,7 +128,7 @@ public class Rules {
 
     public static HashSet<ChessMove> KnightMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
-        HashSet<ChessMove> out = new HashSet<>();
+        HashSet<ChessMove> out = new HashSet<ChessMove>();
 
         ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
 
@@ -128,7 +150,7 @@ public class Rules {
 
     public static HashSet<ChessMove> RookMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
-        HashSet<ChessMove> out = new HashSet<>();
+        HashSet<ChessMove> out = new HashSet<ChessMove>();
 
         ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
 
@@ -138,7 +160,7 @@ public class Rules {
             int newCol = currPos.getColumn() + i;
             while (newCol >= 0 && newCol < 8) {
                 out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
-                // May need: newCol += i; Will need to test.
+                newCol += i;
             }
         }
 
@@ -148,7 +170,7 @@ public class Rules {
             int newCol = currPos.getColumn();
             while (newRow >= 0 && newRow < 8) {
                 out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
-                // May need: newRow += i; Will need to test.
+                newRow += i;
             }
         }
 
@@ -159,7 +181,7 @@ public class Rules {
         var currPos = position;
         var currMoves = piece.GetMoves();
         var field = board.getBoard();
-        HashSet<ChessMove> out = new HashSet<>();
+        HashSet<ChessMove> out = new HashSet<ChessMove>();
 
 
         ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
@@ -192,5 +214,4 @@ public class Rules {
         }
         return out;
     }
-
 }
