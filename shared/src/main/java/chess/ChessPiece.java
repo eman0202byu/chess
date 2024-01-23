@@ -96,4 +96,58 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(team, identity, moves);
     }
+
+    @Override
+    public String toString() {
+        switch (team){
+            case BLACK -> {
+                switch (identity){
+                    case KING -> {
+                        return "K";
+                    }
+                    case QUEEN -> {
+                        return "Q";
+                    }
+                    case BISHOP -> {
+                        return "B";
+                    }
+                    case KNIGHT -> {
+                        return "N";
+                    }
+                    case ROOK -> {
+                        return "R";
+                    }
+                    case PAWN -> {
+                        return "P";
+                    }
+                }
+            }
+            case WHITE -> {
+                switch (identity){
+                    case KING -> {
+                        return "k";
+                    }
+                    case QUEEN -> {
+                        return "q";
+                    }
+                    case BISHOP -> {
+                        return "b";
+                    }
+                    case KNIGHT -> {
+                        return "n";
+                    }
+                    case ROOK -> {
+                        return "r";
+                    }
+                    case PAWN -> {
+                        return "p";
+                    }
+                }
+            }
+            case null, default -> {
+                return "0";
+            }
+        }
+        return "8";
+    }
 }

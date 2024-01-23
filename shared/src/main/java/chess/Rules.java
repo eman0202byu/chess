@@ -90,10 +90,10 @@ public class Rules {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (i != 0 || j != 0) { // Skip starting
-                    int newRow = currPos.getRow() + i;
-                    int newCol = currPos.getColumn() + j;
+                    int newRow = currPos.getArrayRow() + i;
+                    int newCol = currPos.getArrayColumn() + j;
                     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                        out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+                        out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                     }
                 }
             }
@@ -110,14 +110,14 @@ public class Rules {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (i != 0 || j != 0) { // Skip starting
-                    int newRow = currPos.getRow() + i;
-                    int newCol = currPos.getColumn() + j;
+                    int newRow = currPos.getArrayRow() + i;
+                    int newCol = currPos.getArrayColumn() + j;
                     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
                         do {
-                            out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+                            out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                             newRow += i;
                             newCol += j;
-                        } while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && field[i][j] == null);
+                        } while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && field[newRow][newCol] == null);
                     }
                 }
             }
@@ -137,43 +137,52 @@ public class Rules {
         int[] colMoves = {1, 2, 2, 1, -1, -2, -2, -1};
 
         for (int i = 0; i < rowMoves.length; i++) {
-            int newRow = currPos.getRow() + rowMoves[i];
-            int newCol = currPos.getColumn() + colMoves[i];
+            int newRow = currPos.getArrayRow() + rowMoves[i];
+            int newCol = currPos.getArrayColumn() + colMoves[i];
 
             if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+                out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
             }
         }
-
         return out;
     }
 
     public static HashSet<ChessMove> RookMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
+        var field = board.getBoard();
         HashSet<ChessMove> out = new HashSet<ChessMove>();
 
         ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
 
-        // Piece Col moves
-        for (int i = -1; i <= 1; i += 2) {
-            int newRow = currPos.getRow();
-            int newCol = currPos.getColumn() + i;
-            while (newCol >= 0 && newCol < 8) {
-                out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
-                newCol += i;
-            }
-        }
 
         // Piece Row moves
         for (int i = -1; i <= 1; i += 2) {
-            int newRow = currPos.getRow() + i;
-            int newCol = currPos.getColumn();
-            while (newRow >= 0 && newRow < 8) {
-                out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
-                newRow += i;
+            int newRow = currPos.getArrayRow();
+            int newCol = currPos.getArrayColumn() + i;
+            while ((newRow >= 0 && newRow < 8) && (newCol >= 0 && newCol < 8)) {
+                if (field[newRow][newCol] == null) {
+                    out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
+                    newCol += i;
+                }else{
+                    newCol = 19;
+                }
             }
         }
+        //// TODO:KNOWN ERROR -> COL 3 (array 2) IT thinks that you are in a different COL when doing these calculations
 
+        // Piece Col moves
+        for (int i = -1; i <= 1; i += 2) {
+            int newRow = currPos.getArrayRow() + i;
+            int newCol = currPos.getArrayColumn();
+            while ((newRow >= 0 && newRow < 8) && (newCol >= 0 && newCol < 8)) {
+                if (field[newRow][newCol] == null) {
+                out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
+                newRow += i;
+                }else{
+                    newRow = 91;
+                }
+            }
+        }
         return out;
     }
 
@@ -190,28 +199,48 @@ public class Rules {
 
 
         // Normal piece movement
-        int newRow = currPos.getRow() + direction;
-        int newCol = currPos.getColumn();
+        int newRow = currPos.getArrayRow() + direction;
+        int newCol = currPos.getArrayColumn();
         if (newRow >= 0 && newRow < 8 && field[newRow][newCol] == null) {
-            out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+            out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
         }
 
         // Piece movement on initial move
-        if (currMoves == 0) {
-            newRow = currPos.getRow() + 2 * direction;
-            if (newRow >= 0 && newRow < 8 && field[newRow][newCol] == null) {
-                out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+        if (currPos.getRow() == 2 || currPos.getRow() == 7) {
+            newRow = currPos.getArrayRow() + 2 * direction;
+            if (newRow >= 0 && newRow < 8 && field[newRow][newCol] == null && field[newRow - direction][newCol] == null) {
+                out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
             }
         }
 
+
+        // Capture
         int[] teamOffsets = {-1, 1};
         for (int offset : teamOffsets) {
-            newCol = currPos.getColumn() + offset;
+            newCol = currPos.getArrayColumn() + offset;
+            newRow = currPos.getArrayRow() + direction;
             //Below if() was a pain to make, and I don't know if it will actually work.
             if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8 && field[newRow][newCol] != null && field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
-                out.add(new ChessMove(currPos, new ChessPosition(newRow, newCol)));
+                out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
             }
         }
-        return out;
+
+        // Promotion
+        HashSet<ChessMove> realOut = new HashSet<>();
+        for (var a : out) {
+            if (a.end.getRow() == 1 || a.end.getRow() == 8) {
+                ChessMove cm = new ChessMove(a.start, a.end, ChessPiece.PieceType.KNIGHT);
+                realOut.add(cm);
+                cm = new ChessMove(a.start, a.end, ChessPiece.PieceType.BISHOP);
+                realOut.add(cm);
+                cm = new ChessMove(a.start, a.end, ChessPiece.PieceType.QUEEN);
+                realOut.add(cm);
+                cm = new ChessMove(a.start, a.end, ChessPiece.PieceType.ROOK);
+                realOut.add(cm);
+            } else {
+                realOut.add(a);
+            }
+        }
+        return realOut;
     }
 }
