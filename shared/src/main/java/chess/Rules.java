@@ -30,6 +30,23 @@ public class Rules {
         }
     }
 
+    public static HashSet<ChessMove> FriendCheck(HashSet<ChessMove> old, ChessBoard board, ChessPiece piece){
+        var out = new HashSet<ChessMove>();
+        for(ChessMove curr : old){
+            var start = curr.getStartPosition();
+            var end = curr.getEndPosition();
+
+            if (board.getBoard()[end.getArrayRow()][end.getArrayColumn()] == null) {
+                out.add(curr);
+            }else if(board.getBoard()[end.getArrayRow()][end.getArrayColumn()].getTeamColor() != piece.getTeamColor()){
+                out.add(curr);
+            }else{
+
+            }
+        }
+        return out;
+    }
+
     public static HashSet<ChessMove> BishopMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
         var field = board.getBoard();
@@ -77,7 +94,7 @@ public class Rules {
             }
         }
 
-        return out;
+        return FriendCheck(out,board,piece);
     }
 
     public static HashSet<ChessMove> KingMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
@@ -98,7 +115,7 @@ public class Rules {
                 }
             }
         }
-        return out;
+        return FriendCheck(out,board,piece);
     }
 
     public static HashSet<ChessMove> QueenMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
@@ -113,16 +130,17 @@ public class Rules {
                     int newRow = currPos.getArrayRow() + i;
                     int newCol = currPos.getArrayColumn() + j;
                     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                        do {
+                        while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && field[newRow][newCol] == null){
                             out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                             newRow += i;
                             newCol += j;
-                        } while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && field[newRow][newCol] == null);
+                        }
                     }
                 }
             }
         }
 
+        out = FriendCheck(out,board,piece);
         return out;
     }
 
@@ -144,7 +162,7 @@ public class Rules {
                 out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
             }
         }
-        return out;
+        return FriendCheck(out,board,piece);
     }
 
     public static HashSet<ChessMove> RookMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
@@ -183,6 +201,8 @@ public class Rules {
                 }
             }
         }
+
+        out = FriendCheck(out,board,piece);
         return out;
     }
 

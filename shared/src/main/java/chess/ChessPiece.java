@@ -103,28 +103,6 @@ public class ChessPiece {
             case BLACK -> {
                 switch (identity){
                     case KING -> {
-                        return "K";
-                    }
-                    case QUEEN -> {
-                        return "Q";
-                    }
-                    case BISHOP -> {
-                        return "B";
-                    }
-                    case KNIGHT -> {
-                        return "N";
-                    }
-                    case ROOK -> {
-                        return "R";
-                    }
-                    case PAWN -> {
-                        return "P";
-                    }
-                }
-            }
-            case WHITE -> {
-                switch (identity){
-                    case KING -> {
                         return "k";
                     }
                     case QUEEN -> {
@@ -141,6 +119,28 @@ public class ChessPiece {
                     }
                     case PAWN -> {
                         return "p";
+                    }
+                }
+            }
+            case WHITE -> {
+                switch (identity){
+                    case KING -> {
+                        return "K";
+                    }
+                    case QUEEN -> {
+                        return "Q";
+                    }
+                    case BISHOP -> {
+                        return "B";
+                    }
+                    case KNIGHT -> {
+                        return "N";
+                    }
+                    case ROOK -> {
+                        return "R";
+                    }
+                    case PAWN -> {
+                        return "P";
                     }
                 }
             }
