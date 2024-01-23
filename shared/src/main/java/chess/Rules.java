@@ -130,10 +130,15 @@ public class Rules {
                     int newRow = currPos.getArrayRow() + i;
                     int newCol = currPos.getArrayColumn() + j;
                     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                        while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && field[newRow][newCol] == null){
+                        while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && ((field[newRow][newCol] == null) || (field[newRow][newCol] == null ? false : (field[newRow][newCol].getTeamColor() != piece.getTeamColor())))){
                             out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                             newRow += i;
                             newCol += j;
+                            if(field[(newRow - i)][(newCol - j)] != null) {
+                                if (field[(newRow - i)][(newCol - j)].getTeamColor() != piece.getTeamColor()) {
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -201,7 +206,7 @@ public class Rules {
                 newRow += i;
                 }else if(field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
                     out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
-                    newCol = 99;
+                    newCol = 98;
                 }else{
                     newRow = 91;
                 }
