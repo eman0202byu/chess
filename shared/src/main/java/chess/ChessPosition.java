@@ -12,6 +12,7 @@ public class ChessPosition {
 
     int Row = 0;
     int Col = 0;
+
     public ChessPosition(int row, int col) {
         Row = row;
         Col = col;
@@ -26,8 +27,7 @@ public class ChessPosition {
     }
 
 
-
-    public void setRow(int row){
+    public void setRow(int row) {
         Row = row;
     }
 
@@ -39,15 +39,15 @@ public class ChessPosition {
         return Col;
     }
 
-    public void setColumn(int col){
+    public void setColumn(int col) {
         Col = col;
     }
 
-    public int getArrayRow(){
+    public int getArrayRow() {
         return (Row - 1);
     }
 
-    public int getArrayColumn(){
+    public int getArrayColumn() {
         return (Col - 1);
     }
 
@@ -62,6 +62,11 @@ public class ChessPosition {
     @Override
     public int hashCode() {
         return Objects.hash(Row, Col);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("R%d:C%d", Row, Col);
     }
 }
 

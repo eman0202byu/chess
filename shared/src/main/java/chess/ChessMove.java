@@ -64,4 +64,13 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(start, end, update);
     }
+
+    @Override
+    public String toString() {
+        if (update != null) {
+            return String.format("%s->%s::%s", start, end, update);
+        } else {
+            return String.format("%s->%s", start, end);
+        }
+    }
 }

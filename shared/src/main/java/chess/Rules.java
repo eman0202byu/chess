@@ -30,17 +30,16 @@ public class Rules {
         }
     }
 
-    public static HashSet<ChessMove> FriendCheck(HashSet<ChessMove> old, ChessBoard board, ChessPiece piece){
+    public static HashSet<ChessMove> FriendCheck(HashSet<ChessMove> old, ChessBoard board, ChessPiece piece) {
         var out = new HashSet<ChessMove>();
-        for(ChessMove curr : old){
-            var start = curr.getStartPosition();
+        for (ChessMove curr : old) {
             var end = curr.getEndPosition();
 
             if (board.getBoard()[end.getArrayRow()][end.getArrayColumn()] == null) {
                 out.add(curr);
-            }else if(board.getBoard()[end.getArrayRow()][end.getArrayColumn()].getTeamColor() != piece.getTeamColor()){
+            } else if (board.getBoard()[end.getArrayRow()][end.getArrayColumn()].getTeamColor() != piece.getTeamColor()) {
                 out.add(curr);
-            }else{
+            } else {
 
             }
         }
@@ -51,8 +50,6 @@ public class Rules {
         var currPos = position;
         var field = board.getBoard();
         HashSet<ChessMove> out = new HashSet<ChessMove>();
-
-        ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
 
         // top-left to bottom-right
         for (int i = 1; currPos.getArrayRow() + i < 8 && currPos.getArrayColumn() + i < 8; i++) {
@@ -94,14 +91,12 @@ public class Rules {
             }
         }
 
-        return FriendCheck(out,board,piece);
+        return FriendCheck(out, board, piece);
     }
 
     public static HashSet<ChessMove> KingMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
         HashSet<ChessMove> out = new HashSet<ChessMove>();
-
-        ////-NOTE: This one is simple, so I am probably fine, but check implementation
 
         // Col and Row moves simultaneously
         for (int i = -1; i <= 1; i++) {
@@ -115,45 +110,22 @@ public class Rules {
                 }
             }
         }
-        return FriendCheck(out,board,piece);
+        return FriendCheck(out, board, piece);
     }
 
     public static HashSet<ChessMove> QueenMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
-        var currPos = position;
-        var field = board.getBoard();
         HashSet<ChessMove> out = new HashSet<ChessMove>();
 
-        // Col and Row moves simultaneously
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                if (i != 0 || j != 0) { // Skip starting
-                    int newRow = currPos.getArrayRow() + i;
-                    int newCol = currPos.getArrayColumn() + j;
-                    if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                        while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && ((field[newRow][newCol] == null) || (field[newRow][newCol] == null ? false : (field[newRow][newCol].getTeamColor() != piece.getTeamColor())))){
-                            out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
-                            newRow += i;
-                            newCol += j;
-                            if(field[(newRow - i)][(newCol - j)] != null) {
-                                if (field[(newRow - i)][(newCol - j)].getTeamColor() != piece.getTeamColor()) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        out = BishopMov(board, position, piece);
+        out.addAll(RookMov(board, position, piece));
 
-        out = FriendCheck(out,board,piece);
+        out = FriendCheck(out, board, piece);
         return out;
     }
 
     public static HashSet<ChessMove> KnightMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
         HashSet<ChessMove> out = new HashSet<ChessMove>();
-
-        ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
 
         // Possible moves
         int[] rowMoves = {-2, -1, 1, 2, 2, 1, -1, -2};
@@ -167,16 +139,13 @@ public class Rules {
                 out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
             }
         }
-        return FriendCheck(out,board,piece);
+        return FriendCheck(out, board, piece);
     }
 
     public static HashSet<ChessMove> RookMov(ChessBoard board, ChessPosition position, ChessPiece piece) {
         var currPos = position;
         var field = board.getBoard();
         HashSet<ChessMove> out = new HashSet<ChessMove>();
-
-        ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
-
 
         // Piece Row moves
         for (int i = -1; i <= 1; i += 2) {
@@ -186,15 +155,14 @@ public class Rules {
                 if (field[newRow][newCol] == null) {
                     out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                     newCol += i;
-                }else if(field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
+                } else if (field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
                     out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                     newCol = 99;
-                }else{
+                } else {
                     newCol = 19;
                 }
             }
         }
-        //// TODO:KNOWN ERROR -> COL 3 (array 2) IT thinks that you are in a different COL when doing these calculations
 
         // Piece Col moves
         for (int i = -1; i <= 1; i += 2) {
@@ -202,18 +170,18 @@ public class Rules {
             int newCol = currPos.getArrayColumn();
             while ((newRow >= 0 && newRow < 8) && (newCol >= 0 && newCol < 8)) {
                 if (field[newRow][newCol] == null) {
-                out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
-                newRow += i;
-                }else if(field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
+                    out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
+                    newRow += i;
+                } else if (field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
                     out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
                     newCol = 98;
-                }else{
+                } else {
                     newRow = 91;
                 }
             }
         }
 
-        out = FriendCheck(out,board,piece);
+        out = FriendCheck(out, board, piece);
         return out;
     }
 
@@ -223,11 +191,7 @@ public class Rules {
         var field = board.getBoard();
         HashSet<ChessMove> out = new HashSet<ChessMove>();
 
-
-        ////-NOTE: CHECK IMPLEMENTATION, I MADE THIS WITHOUT TESTING IT!!! IT WILL PROBABLY FAIL!!!!
-
         int direction = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 1 : -1;
-
 
         // Normal piece movement
         int newRow = currPos.getArrayRow() + direction;
@@ -244,13 +208,11 @@ public class Rules {
             }
         }
 
-
         // Capture
         int[] teamOffsets = {-1, 1};
         for (int offset : teamOffsets) {
             newCol = currPos.getArrayColumn() + offset;
             newRow = currPos.getArrayRow() + direction;
-            //Below if() was a pain to make, and I don't know if it will actually work.
             if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8 && field[newRow][newCol] != null && field[newRow][newCol].getTeamColor() != piece.getTeamColor()) {
                 out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
             }
@@ -259,7 +221,7 @@ public class Rules {
         // Promotion
         HashSet<ChessMove> realOut = new HashSet<>();
         for (var a : out) {
-            if (a.end.getRow() == 1 || a.end.getRow() == 8) {
+            if ((a.end.getRow() == 1 && piece.getTeamColor() == ChessGame.TeamColor.BLACK) || (a.end.getRow() == 8 && piece.getTeamColor() == ChessGame.TeamColor.WHITE)) {
                 ChessMove cm = new ChessMove(a.start, a.end, ChessPiece.PieceType.KNIGHT);
                 realOut.add(cm);
                 cm = new ChessMove(a.start, a.end, ChessPiece.PieceType.BISHOP);
@@ -275,3 +237,25 @@ public class Rules {
         return realOut;
     }
 }
+
+// OLD QUEEN: Col and Row moves simultaneously
+//        for (int i = -1; i <= 1; i++) {
+//            for (int j = -1; j <= 1; j++) {
+//                if (i != 0 || j != 0) { // Skip starting
+//                    int newRow = currPos.getArrayRow() + i;
+//                    int newCol = currPos.getArrayColumn() + j;
+//                    if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+//                        while ((newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) && ((field[newRow][newCol] == null) || (field[newRow][newCol] == null ? false : (field[newRow][newCol].getTeamColor() != piece.getTeamColor())))){
+//                            out.add(new ChessMove(currPos, new ChessPosition((newRow + 1), (newCol + 1))));
+//                            newRow += i;
+//                            newCol += j;
+//                            if(field[(newRow - i)][(newCol - j)] != null) {
+//                                if (field[(newRow - i)][(newCol - j)].getTeamColor() != piece.getTeamColor()) {
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
