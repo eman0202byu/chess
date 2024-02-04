@@ -10,15 +10,31 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    public ChessGame() {
+    //Turn = Team Color (White = true, Black = false)
+    Boolean Turn = true;
+    //Field = Chess Board
+    ChessBoard Field = new ChessBoard();
 
+    public ChessGame(ChessBoard start) {
+        Field = start;
     }
+
+    public ChessGame() {
+        Field.resetBoard();
+    }
+
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        if (Turn) {
+            return TeamColor.WHITE;
+        } else if (!Turn) {
+            return TeamColor.BLACK;
+        } else {
+            throw new RuntimeException("getTeamTurn()::bool Turn != (true || false)");
+        }
     }
 
     /**
@@ -27,7 +43,13 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        if (team == TeamColor.WHITE) {
+            Turn = true;
+        } else if (team == TeamColor.BLACK) {
+            Turn = false;
+        } else {
+            throw new RuntimeException("setTeamTurn()::TeamColor team != (WHITE || BLACK)");
+        }
     }
 
     /**
@@ -46,7 +68,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if ((startPosition.getRow() <= 8 && startPosition.getColumn() <= 8) && (startPosition.getRow() >= 1 && startPosition.getColumn() >= 1)) {
+            var Row = startPosition.getArrayRow();
+            var Col = startPosition.getArrayColumn();
+            Collection<ChessMove> Moves = Field.getBoard()[Row][Col].pieceMoves(Field, startPosition);
+            return Moves;
+        } else {
+            throw new RuntimeException("validMoves()::ChessPosition startPosition = INVALID_LOCATION");
+        }
     }
 
     /**
@@ -56,7 +85,20 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        var end_pos = move.getEndPosition();
+        var start_pos = move.getStartPosition();
+        Collection<ChessMove> valid = validMoves(start_pos);
+        Boolean sentinal = false;
+        for (ChessMove curr : valid) {
+            if (curr.getEndPosition().equals(end_pos)) {
+                sentinal = true;
+            }
+        }
+        if (sentinal) {
+            Field.movePiece(move);
+        } else {
+            throw new InvalidMoveException("Invalid_Move");
+        }
     }
 
     /**
@@ -96,7 +138,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        Field = board;
     }
 
     /**
@@ -105,6 +147,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return Field;
     }
 }

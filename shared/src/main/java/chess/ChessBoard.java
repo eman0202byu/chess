@@ -14,7 +14,6 @@ public class ChessBoard {
     ChessPiece[][] reset = new ChessPiece[8][8];
 
 
-
     public ChessBoard() {
         reset[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
         reset[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
@@ -81,6 +80,18 @@ public class ChessBoard {
         squares = reset;
     }
 
+    public void movePiece(ChessMove movement) {
+        var start_pos = movement.getStartPosition();
+        var end_pos = movement.getEndPosition();
+        var init_row = start_pos.getArrayRow();
+        var init_col = start_pos.getArrayColumn();
+        var fin_row = end_pos.getArrayRow();
+        var fin_col = end_pos.getArrayColumn();
+        var to_move = squares[init_row][init_col];
+        squares[init_row][init_col] = null;
+        squares[fin_row][fin_col] = to_move;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,10 +111,10 @@ public class ChessBoard {
         for (int i = 0; i < 8; i++) {
             sb.append('|');
             for (int j = 0; j < 8; j++) {
-                if(getBoard()[i][j] != null){
-                sb.append(getBoard()[i][j].toString());
-                sb.append('|');
-                }else{
+                if (getBoard()[i][j] != null) {
+                    sb.append(getBoard()[i][j].toString());
+                    sb.append('|');
+                } else {
                     sb.append(" ");
                     sb.append('|');
                 }
