@@ -71,7 +71,7 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+    public HashSet<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessBoard currBoard = board;
         ChessPosition currPos = myPosition;
         var currPiece = board.getPiece(myPosition);
@@ -99,9 +99,9 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        switch (team){
+        switch (team) {
             case BLACK -> {
-                switch (identity){
+                switch (identity) {
                     case KING -> {
                         return "k";
                     }
@@ -123,7 +123,7 @@ public class ChessPiece {
                 }
             }
             case WHITE -> {
-                switch (identity){
+                switch (identity) {
                     case KING -> {
                         return "K";
                     }

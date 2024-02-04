@@ -92,6 +92,18 @@ public class ChessBoard {
         squares[fin_row][fin_col] = to_move;
     }
 
+    public ChessBoard deepCopy() {
+        ChessBoard copy = new ChessBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (this.getBoard()[i][j] != null) {
+                    copy.getBoard()[i][j] = new ChessPiece(this.getBoard()[i][j].getTeamColor(), this.getBoard()[i][j].getPieceType());
+                }
+            }
+        }
+        return copy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,7 +120,7 @@ public class ChessBoard {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 7; i > -1; i--) {
             sb.append('|');
             for (int j = 0; j < 8; j++) {
                 if (getBoard()[i][j] != null) {

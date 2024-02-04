@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -71,11 +73,34 @@ public class ChessGame {
         if ((startPosition.getRow() <= 8 && startPosition.getColumn() <= 8) && (startPosition.getRow() >= 1 && startPosition.getColumn() >= 1)) {
             var Row = startPosition.getArrayRow();
             var Col = startPosition.getArrayColumn();
-            Collection<ChessMove> Moves = Field.getBoard()[Row][Col].pieceMoves(Field, startPosition);
-            return Moves;
+            HashSet<ChessMove> All_Moves = null;
+            if (Field.getBoard()[Row][Col] != null) {
+                All_Moves = Field.getBoard()[Row][Col].pieceMoves(Field, startPosition);
+            } else {
+                return null;
+            }
+            HashSet<ChessMove> Clean_Moves = remove_invalid_moves(All_Moves);
+
+            return Clean_Moves;
         } else {
             throw new RuntimeException("validMoves()::ChessPosition startPosition = INVALID_LOCATION");
         }
+    }
+
+    private HashSet<ChessMove> remove_invalid_moves(Collection<ChessMove> old) {
+        HashSet<ChessMove> output = new HashSet<ChessMove>();
+        for (ChessMove curr : old) {
+            ChessGame tmp = this.dupe();
+            try {
+                tmp.checkMove(curr);
+
+                //This will only happen if the move is valid
+                output.add(curr);
+            } catch (InvalidMoveException e) {
+
+            }
+        }
+        return output;
     }
 
     /**
@@ -84,16 +109,83 @@ public class ChessGame {
      * @param move chess move to preform
      * @throws InvalidMoveException if move is invalid
      */
-    public void makeMove(ChessMove move) throws InvalidMoveException {
+
+    private void checkMove(ChessMove move) throws InvalidMoveException {
         var end_pos = move.getEndPosition();
         var start_pos = move.getStartPosition();
-        Collection<ChessMove> valid = validMoves(start_pos);
+        TeamColor my_team = null;
+        if (Field.getBoard()[start_pos.getArrayRow()][start_pos.getArrayColumn()] != null) {
+            my_team = Field.getBoard()[start_pos.getArrayRow()][start_pos.getArrayColumn()].getTeamColor();
+        } else {
+            my_team = null;
+        }
+
+        Collection<ChessMove> valid = null;
+        if (true) {
+            var Row = start_pos.getArrayRow();
+            var Col = start_pos.getArrayColumn();
+            HashSet<ChessMove> All_Moves = null;
+            if (Field.getBoard()[Row][Col] != null) {
+                valid = Field.getBoard()[Row][Col].pieceMoves(Field, start_pos);
+            } else {
+
+            }
+        }
+
         Boolean sentinal = false;
+        if (valid == null) {
+            throw new InvalidMoveException("NO_VALID_MOVES");
+        }
         for (ChessMove curr : valid) {
             if (curr.getEndPosition().equals(end_pos)) {
                 sentinal = true;
             }
         }
+        //Check 1 -> Check if end_pos is valid move (No Check, Stall)
+        if (sentinal) {
+            var tmp = this.dupe();
+            tmp.getBoard().movePiece(move);
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (tmp.getBoard().getBoard()[i][j] != null) {
+                        if (tmp.getBoard().getBoard()[i][j].getTeamColor() != my_team) {
+                            Collection<ChessMove> enemy_moves = tmp.getBoard().getBoard()[i][j].pieceMoves(tmp.getBoard(), new ChessPosition(i + 1, j + 1));
+                            for (var enemy_move : enemy_moves) {
+                                if (tmp.getBoard().getBoard()[enemy_move.getEndPosition().getArrayRow()][enemy_move.getEndPosition().getArrayColumn()] != null) {
+                                    if (tmp.getBoard().getBoard()[enemy_move.getEndPosition().getArrayRow()][enemy_move.getEndPosition().getArrayColumn()].getPieceType() == ChessPiece.PieceType.KING) {
+                                        throw new InvalidMoveException("Enemy_Can_Capture_King");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            throw new InvalidMoveException("Invalid_Move");
+        }
+    }
+
+    public void makeMove(ChessMove move) throws InvalidMoveException {
+        var end_pos = move.getEndPosition();
+        var start_pos = move.getStartPosition();
+        TeamColor my_team = null;
+        if (Field.getBoard()[start_pos.getArrayRow()][start_pos.getArrayColumn()] != null) {
+            my_team = Field.getBoard()[start_pos.getArrayRow()][start_pos.getArrayColumn()].getTeamColor();
+        } else {
+            my_team = null;
+        }
+        Collection<ChessMove> valid = validMoves(start_pos);
+        Boolean sentinal = false;
+        if (valid == null) {
+            throw new InvalidMoveException("NO_VALID_MOVES");
+        }
+        for (ChessMove curr : valid) {
+            if (curr.getEndPosition().equals(end_pos)) {
+                sentinal = true;
+            }
+        }
+        //Check 1 -> Check if end_pos is valid move (No Check, Stall)
         if (sentinal) {
             Field.movePiece(move);
         } else {
@@ -148,5 +240,13 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return Field;
+    }
+
+    // Creates a copy of Field
+    private ChessGame dupe() {
+        ChessGame out = new ChessGame();
+        out.Turn = Turn;
+        out.Field = Field.deepCopy(); // Create a deep copy of ChessBoard
+        return out;
     }
 }
