@@ -90,14 +90,16 @@ public class ChessGame {
                 HashSet<ChessMove> movesToRemove = new HashSet<>();
                 for (var move : Clean_Moves) {
                     if ((move.getEndPosition().getArrayRow() == 0) || (move.getEndPosition().getArrayRow() == 7)) {
-//                        movesToRemove.add(move);
+                        if (move.getPromotionPiece() == null) {
+                            movesToRemove.add(move);
+                        }
                         Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
                         Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
                         Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
                         Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.ROOK));
                     }
                 }
-//                Clean_Moves.removeAll(movesToRemove);
+                Clean_Moves.removeAll(movesToRemove);
             }
             return Clean_Moves;
         } else {
