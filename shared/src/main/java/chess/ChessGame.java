@@ -80,7 +80,25 @@ public class ChessGame {
                 return null;
             }
             HashSet<ChessMove> Clean_Moves = remove_invalid_moves(All_Moves);
-
+            ChessPiece.PieceType type = null;
+            if (Field.getBoard()[Row][Col] != null) {
+                type = Field.getBoard()[Row][Col].getPieceType();
+            } else {
+                type = null;
+            }
+            if (type == ChessPiece.PieceType.PAWN) {
+                HashSet<ChessMove> movesToRemove = new HashSet<>();
+                for (var move : Clean_Moves) {
+                    if ((move.getEndPosition().getArrayRow() == 0) || (move.getEndPosition().getArrayRow() == 7)) {
+//                        movesToRemove.add(move);
+                        Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
+                        Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
+                        Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
+                        Clean_Moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.ROOK));
+                    }
+                }
+//                Clean_Moves.removeAll(movesToRemove);
+            }
             return Clean_Moves;
         } else {
             throw new RuntimeException("validMoves()::ChessPosition startPosition = INVALID_LOCATION");

@@ -88,6 +88,15 @@ public class ChessBoard {
         var fin_row = end_pos.getArrayRow();
         var fin_col = end_pos.getArrayColumn();
         var to_move = squares[init_row][init_col];
+        ChessPiece.PieceType promote = null;
+        if (movement.getPromotionPiece() != null) {
+            promote = movement.getPromotionPiece();
+        }
+        if (promote != null) {
+            squares[init_row][init_col] = null;
+            to_move.promote(promote);
+            squares[fin_row][fin_col] = to_move;
+        }
         squares[init_row][init_col] = null;
         squares[fin_row][fin_col] = to_move;
     }
