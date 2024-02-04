@@ -101,6 +101,37 @@ public class ChessGame {
                 }
                 Clean_Moves.removeAll(movesToRemove);
             }
+            if (type == ChessPiece.PieceType.KING) {
+                HashSet<ChessMove> movesToRemove = new HashSet<>();
+                HashSet<ChessMove> All_Enemy_Moves = new HashSet<ChessMove>();
+                for (int i = 0; i < 8; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        if (Field.getBoard()[i][j] != null) {
+                            if (Field.getBoard()[Row][Col] != null) {
+                                if (Field.getBoard()[i][j].getTeamColor() != Field.getBoard()[Row][Col].getTeamColor()) {
+                                    Collection<ChessMove> enemy_moves = Field.getBoard()[i][j].pieceMoves(Field, new ChessPosition(i + 1, j + 1));
+                                    for (var enemy_move : enemy_moves) {
+                                        if (Field.getBoard()[enemy_move.getEndPosition().getArrayRow()][enemy_move.getEndPosition().getArrayColumn()] != null) {
+                                            if (Field.getBoard()[enemy_move.getEndPosition().getArrayRow()][enemy_move.getEndPosition().getArrayColumn()].getPieceType() == ChessPiece.PieceType.KING) {
+                                                All_Enemy_Moves.add(enemy_move);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                for (var friend_move : Clean_Moves) {
+                    for (var enemy_move : All_Enemy_Moves) {
+                        var Ill_Pos = enemy_move.getEndPosition();
+                        if (friend_move.getEndPosition() == Ill_Pos) {
+                            movesToRemove.add(friend_move);
+                        }
+                    }
+                }
+                Clean_Moves.removeAll(movesToRemove);
+            }
             return Clean_Moves;
         } else {
             throw new RuntimeException("validMoves()::ChessPosition startPosition = INVALID_LOCATION");
@@ -263,7 +294,7 @@ public class ChessGame {
                         if (tmp.getBoard().getBoard()[i][j].getTeamColor() == teamColor) {
                             Collection<ChessMove> friend_moves = tmp.getBoard().getBoard()[i][j].pieceMoves(tmp.getBoard(), new ChessPosition(i + 1, j + 1));
                             for (var friend_move : friend_moves) {
-                                if (tmp.getBoard().getBoard()[friend_move.getEndPosition().getArrayRow()][friend_move.getEndPosition().getArrayColumn()] != null) {
+                                if (tmp.getBoard().getBoard()[friend_move.getStartPosition().getArrayRow()][friend_move.getStartPosition().getArrayColumn()] != null) {
                                     All_Friend_Moves.add(friend_move);
                                 }
                             }
@@ -294,7 +325,54 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        HashSet<ChessMove> All_Friend_Moves = new HashSet<ChessMove>();
+        HashSet<ChessMove> All_Enemy_Moves = new HashSet<ChessMove>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (Field.getBoard()[i][j] != null) {
+                    if (Field.getBoard()[i][j].getTeamColor() != teamColor) {
+                        Collection<ChessMove> enemy_moves = Field.getBoard()[i][j].pieceMoves(Field, new ChessPosition(i + 1, j + 1));
+                        for (var enemy_move : enemy_moves) {
+                            if (Field.getBoard()[enemy_move.getEndPosition().getArrayRow()][enemy_move.getEndPosition().getArrayColumn()] != null) {
+                                if (Field.getBoard()[enemy_move.getEndPosition().getArrayRow()][enemy_move.getEndPosition().getArrayColumn()].getPieceType() == ChessPiece.PieceType.KING) {
+                                    All_Enemy_Moves.add(enemy_move);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (Field.getBoard()[i][j] != null) {
+                    if (Field.getBoard()[i][j].getTeamColor() == teamColor) {
+                        Collection<ChessMove> friend_moves = Field.getBoard()[i][j].pieceMoves(Field, new ChessPosition(i + 1, j + 1));
+                        for (var friend_move : friend_moves) {
+                            if (Field.getBoard()[friend_move.getStartPosition().getArrayRow()][friend_move.getStartPosition().getArrayColumn()] != null) {
+                                if (Field.getBoard()[friend_move.getStartPosition().getArrayRow()][friend_move.getStartPosition().getArrayColumn()].getPieceType() == ChessPiece.PieceType.KING) {
+                                    for (var enemy : All_Enemy_Moves) {
+                                        var Ill_Pos = enemy.getEndPosition();
+                                        if (friend_move.getEndPosition() == Ill_Pos) {
+                                            //Do not add
+                                        } else {
+                                            All_Friend_Moves.add(friend_move);
+                                        }
+                                    }
+                                } else {
+                                    All_Friend_Moves.add(friend_move);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (All_Friend_Moves.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
