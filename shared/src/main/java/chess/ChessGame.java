@@ -252,7 +252,38 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        } else {
+            var tmp = this.dupe();
+            HashSet<ChessMove> All_Friend_Moves = new HashSet<ChessMove>();
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (tmp.getBoard().getBoard()[i][j] != null) {
+                        if (tmp.getBoard().getBoard()[i][j].getTeamColor() == teamColor) {
+                            Collection<ChessMove> friend_moves = tmp.getBoard().getBoard()[i][j].pieceMoves(tmp.getBoard(), new ChessPosition(i + 1, j + 1));
+                            for (var friend_move : friend_moves) {
+                                if (tmp.getBoard().getBoard()[friend_move.getEndPosition().getArrayRow()][friend_move.getEndPosition().getArrayColumn()] != null) {
+                                    All_Friend_Moves.add(friend_move);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (var save : All_Friend_Moves) {
+                var scoped = tmp.dupe();
+                try {
+                    scoped.makeMove(save);
+                } catch (InvalidMoveException e) {
+                    //Useless
+                }
+                if (!scoped.isInCheck(teamColor)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     /**
