@@ -195,6 +195,11 @@ public class ChessGame {
         } else {
             my_team = null;
         }
+        if ((my_team == TeamColor.WHITE) && !Turn) {
+            throw new InvalidMoveException("IT_IS_BLACK_TURN");
+        } else if ((my_team == TeamColor.BLACK) && Turn) {
+            throw new InvalidMoveException("IT_IS_WHITE_TURN");
+        }
         Collection<ChessMove> valid = validMoves(start_pos);
         Boolean sentinal = false;
         if (valid == null) {
@@ -208,6 +213,7 @@ public class ChessGame {
         //Check 1 -> Check if end_pos is valid move (No Check, Stall)
         if (sentinal) {
             Field.movePiece(move);
+            Turn = !Turn;
         } else {
             throw new InvalidMoveException("Invalid_Move");
         }
