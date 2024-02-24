@@ -2,8 +2,9 @@ package server;
 
 import java.util.*;
 
+import dataAccess.DataAccessException;
 import model.*;
-import service.ChessService;
+import service.*;
 import spark.*;
 import com.google.gson.Gson;
 
@@ -68,7 +69,12 @@ public class Server {
     // Register endpoint handler
     private Object registerUser(Request request, Response response) {
         var user = new Gson().fromJson(request.body(), UserData.class);
-        user = service.registerUser(user);
+        try {
+            user = service.registerUser(user);
+        } catch (DataAccessException e) {
+            response.status(501);
+            return null; //TODO:: IMPLEMENT
+        }
         response.status(200);
         return new Gson().toJson(user);
     }
@@ -76,9 +82,14 @@ public class Server {
     // Login endpoint handler
     private Object loginUser(Request request, Response response) {
         var user = new Gson().fromJson(request.body(), UserData.class);
-        var auth = service.loginUser(user);
-        response.status(200);
-        return new Gson().toJson(auth);
+        try {
+            var auth = service.loginUser(user);
+            response.status(200);
+            return new Gson().toJson(auth);
+        } catch (DataAccessException e) {
+            response.status(501);
+            return null; //TODO:: IMPLEMENT
+        }
     }
 
     // Logout endpoint handler
@@ -98,18 +109,28 @@ public class Server {
     // List games endpoint handler
     private Object listGames(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
-        var list = service.listGames(auth).toArray();
-        response.status(200);
-        return new Gson().toJson(Map.of(MAPOFGAMEKEY, list));
+        try {
+            var list = service.listGames(auth).toArray();
+            response.status(200);
+            return new Gson().toJson(Map.of(MAPOFGAMEKEY, list));
+        } catch (DataAccessException e) {
+            response.status(501);
+            return null; //TODO:: IMPLEMENT
+        }
     }
 
     // Create game endpoint handler
     private Object createGame(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
         var gameName = new Gson().fromJson(request.body(), AuthData.class);
-        var game = service.createGames(auth, gameName);
-        response.status(200);
-        return new Gson().toJson(game);
+        try {
+            var game = service.createGames(auth, gameName);
+            response.status(200);
+            return new Gson().toJson(game);
+        } catch (DataAccessException e) {
+            response.status(501);
+            return null; //TODO:: IMPLEMENT
+        }
     }
 
     // Join game endpoint handler
