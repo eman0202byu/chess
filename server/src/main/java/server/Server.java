@@ -2,6 +2,7 @@ package server;
 
 import java.util.*;
 
+import chess.ChessGame;
 import dataAccess.DataAccessException;
 import model.*;
 import service.*;
@@ -136,8 +137,8 @@ public class Server {
     // Join game endpoint handler
     private Object joinGame(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
-        var gameColorAndID = new Gson().fromJson(request.body(), GameData.class);
-        var result = service.joinGames(auth, gameColorAndID);
+        ColorAndID lookLeft = new Gson().fromJson(request.body(), ColorAndID.class);
+        var result = service.joinGames(auth, lookLeft.playerColor, lookLeft.gameID);
         if (result == null) {
             response.status(200);
             return "";

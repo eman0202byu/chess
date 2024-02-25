@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.DataAccessException;
 import model.*;
 import dataAccess.DataAccess;
@@ -8,7 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class ChessService {
-    private final DataAccess dataAccess;
+    private DataAccess dataAccess;
 
     public enum StatusCodes {
         UNAUTHORISED,
@@ -52,7 +53,7 @@ public class ChessService {
         return null; //TODO:: IMPLEMENT
     }
 
-    public ServiceReport joinGames(AuthData auth, GameData gameColorAndID) {
+    public ServiceReport joinGames(AuthData auth, ChessGame.TeamColor color, Integer id) {
         var status = new ServiceReport(StatusCodes.DATAACCESSFAILURE, "NOT_IMPLEMENTED");
         return status; //TODO:: IMPLEMENT
     }
