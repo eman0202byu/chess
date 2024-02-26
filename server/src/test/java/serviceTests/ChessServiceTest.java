@@ -1,4 +1,4 @@
-package Java.serviceTests;
+package serviceTests;
 
 import chess.ChessGame;
 import dataAccess.DataAccess;
@@ -31,6 +31,13 @@ class ChessServiceTest {
         DataAccess exceptionsGrab = new DataAccess();
 
         assertEquals(currTesting.clearDatabase(), new ServiceReport(ChessService.StatusCodes.PASS, null));
+    }
+
+    @Test
+    void clearDatabaseNOT() {
+        ChessService currTesting = new ChessService();
+        DataAccess exceptionsGrab = new DataAccess();
+
         assertNotEquals(currTesting.clearDatabase(), new ServiceReport(ChessService.StatusCodes.DATAACCESSFAILURE, exceptionsGrab.FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION));
         assertNotEquals(currTesting.clearDatabase(), new ServiceReport(ChessService.StatusCodes.DATAACCESSFAILURE, exceptionsGrab.FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION));
         assertNotEquals(currTesting.clearDatabase(), new ServiceReport(ChessService.StatusCodes.DATAACCESSFAILURE, exceptionsGrab.FAILURE_TO_DELETE_USER_TABLE_EXCEPTION));
@@ -49,6 +56,16 @@ class ChessServiceTest {
     }
 
     @Test
+    void registerUserNOT() throws DataAccessException {
+        UserData badUser = new UserData(DNE_USERNAME, DNE_PASS, DNE_EMAIL);
+        UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
+        ChessService currTesting = new ChessService();
+
+        assertDoesNotThrow(() -> currTesting.registerUser(goodUser));
+
+    }
+
+    @Test
     void loginUser() throws DataAccessException {
         UserData badUser = new UserData(DNE_USERNAME, DNE_PASS, DNE_EMAIL);
         UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
@@ -56,6 +73,16 @@ class ChessServiceTest {
         currTesting.registerUser(goodUser);
 
         assertThrows(DataAccessException.class, () -> currTesting.loginUser(badUser));
+        assertDoesNotThrow(() -> currTesting.loginUser(goodUser));
+    }
+
+    @Test
+    void loginUserNOT() throws DataAccessException {
+        UserData badUser = new UserData(DNE_USERNAME, DNE_PASS, DNE_EMAIL);
+        UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
+        ChessService currTesting = new ChessService();
+        currTesting.registerUser(goodUser);
+
         assertDoesNotThrow(() -> currTesting.loginUser(goodUser));
     }
 
@@ -68,12 +95,23 @@ class ChessServiceTest {
         DataAccess exceptionsGrab = new DataAccess();
         currTesting.loginUser(goodUser);
 
-        assertNotEquals(currTesting.logoutUser(badAuth), new ServiceReport(ChessService.StatusCodes.PASS, null));
         assertEquals(currTesting.logoutUser(badAuth), new ServiceReport(ChessService.StatusCodes.UNAUTHORIZED, exceptionsGrab.DB_NULL_RESULT_EXCEPTION));
-        assertNotEquals(currTesting.logoutUser(goodAuth), new ServiceReport(ChessService.StatusCodes.UNAUTHORIZED, exceptionsGrab.DB_NULL_RESULT_EXCEPTION));
         currTesting.loginUser(goodUser);
         assertEquals(currTesting.logoutUser(goodAuth), new ServiceReport(ChessService.StatusCodes.PASS, null));
 
+    }
+
+    @Test
+    void logoutUserNOT() throws DataAccessException {
+        AuthData badAuth = new AuthData(DNE_AUTHTOKEN, DNE_USERNAME);
+        UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
+        ChessService currTesting = new ChessService();
+        var goodAuth = currTesting.registerUser(goodUser);
+        DataAccess exceptionsGrab = new DataAccess();
+        currTesting.loginUser(goodUser);
+
+        assertNotEquals(currTesting.logoutUser(badAuth), new ServiceReport(ChessService.StatusCodes.PASS, null));
+        assertNotEquals(currTesting.logoutUser(goodAuth), new ServiceReport(ChessService.StatusCodes.UNAUTHORIZED, exceptionsGrab.DB_NULL_RESULT_EXCEPTION));
     }
 
     @Test
@@ -87,11 +125,33 @@ class ChessServiceTest {
         currTesting.createGames(goodAuth, goodGame);
 
         assertThrows(DataAccessException.class, () -> currTesting.listGames(badAuth));
-        assertDoesNotThrow(() -> currTesting.listGames(goodAuth));
     }
 
     @Test
+    void listGamesNOT() throws DataAccessException {
+        GameData goodGame = new GameData(GOOD_GAMEID, GOOD_USER, GOOD_USER, GOOD_GAMENAME, new ChessGame());
+        UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
+        ChessService currTesting = new ChessService();
+        currTesting.registerUser(goodUser);
+        var goodAuth = currTesting.loginUser(goodUser);
+        currTesting.createGames(goodAuth, goodGame);
+
+        assertDoesNotThrow(() -> currTesting.listGames(goodAuth));
+    }
+
+
+    @Test
     void createGames() throws DataAccessException {
+        AuthData badAuth = new AuthData(DNE_AUTHTOKEN, DNE_USERNAME);
+        UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
+        ChessService currTesting = new ChessService();
+        currTesting.registerUser(goodUser);
+
+        assertThrows(DataAccessException.class, () -> currTesting.createGames(badAuth, new GameData(null, null, null, DNE_GAMENAME, null)));
+    }
+
+    @Test
+    void createGamesNOT() throws DataAccessException {
         AuthData badAuth = new AuthData(DNE_AUTHTOKEN, DNE_USERNAME);
         GameData goodGame = new GameData(GOOD_GAMEID, GOOD_USER, GOOD_USER, GOOD_GAMENAME, new ChessGame());
         UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
@@ -99,7 +159,6 @@ class ChessServiceTest {
         currTesting.registerUser(goodUser);
         var goodAuth = currTesting.loginUser(goodUser);
 
-        assertThrows(DataAccessException.class, () -> currTesting.createGames(badAuth, new GameData(null, null, null, DNE_GAMENAME, null)));
         assertDoesNotThrow(() -> currTesting.createGames(goodAuth, goodGame));
     }
 
@@ -113,9 +172,21 @@ class ChessServiceTest {
         var goodAuth = currTesting.loginUser(goodUser);
         var existingGame = currTesting.createGames(goodAuth, goodGame);
 
-        assertNotEquals(currTesting.joinGames(goodAuth, null, DNE_GAMEID), new ServiceReport(ChessService.StatusCodes.PASS, null));
         assertEquals(currTesting.joinGames(goodAuth, null, DNE_GAMEID), new ServiceReport(ChessService.StatusCodes.BADREQUEST, exceptionsGrab.DB_NULL_RESULT_EXCEPTION));
-        assertNotEquals(currTesting.joinGames(goodAuth, null, existingGame.gameID()), new ServiceReport(ChessService.StatusCodes.BADREQUEST, exceptionsGrab.DB_NULL_RESULT_EXCEPTION));
         assertEquals(currTesting.joinGames(goodAuth, null, existingGame.gameID()), new ServiceReport(ChessService.StatusCodes.PASS, null));
+    }
+
+    @Test
+    void joinGamesNOT() throws DataAccessException {
+        GameData goodGame = new GameData(GOOD_GAMEID, GOOD_USER, GOOD_USER, GOOD_GAMENAME, new ChessGame());
+        UserData goodUser = new UserData(GOOD_USER, GOOD_PASS, GOOD_EMAIL);
+        ChessService currTesting = new ChessService();
+        DataAccess exceptionsGrab = new DataAccess();
+        currTesting.registerUser(goodUser);
+        var goodAuth = currTesting.loginUser(goodUser);
+        var existingGame = currTesting.createGames(goodAuth, goodGame);
+
+        assertNotEquals(currTesting.joinGames(goodAuth, null, DNE_GAMEID), new ServiceReport(ChessService.StatusCodes.PASS, null));
+        assertNotEquals(currTesting.joinGames(goodAuth, null, existingGame.gameID()), new ServiceReport(ChessService.StatusCodes.BADREQUEST, exceptionsGrab.DB_NULL_RESULT_EXCEPTION));
     }
 }
