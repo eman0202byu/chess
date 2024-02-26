@@ -20,8 +20,8 @@ public class Server {
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
-
         Spark.staticFiles.location("web");
+
 
         // Clear application endpoint
         Spark.delete("/db", this::clearDatabase);
