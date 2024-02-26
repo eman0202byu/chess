@@ -1,4 +1,4 @@
-package serviceTests;
+package Java.serviceTests;
 
 import chess.ChessGame;
 import dataAccess.DataAccess;
