@@ -54,7 +54,7 @@ public class ChessService {
                 String rawReport = new Gson().toJson(report);
                 throw new DataAccessException(rawReport);
             }
-            userObj = userObj.changeEmail(null);
+            userObj.changeEmail(null);
             return authObj;
         } catch (DataAccessException e) {
             if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
