@@ -53,6 +53,7 @@ public class ChessService {
                 String rawReport = new Gson().toJson(report);
                 throw new DataAccessException(rawReport);
             }
+            userObj = userObj.changeEmail(null);
             return userObj;
         } catch (DataAccessException e) {
             ServiceReport report = new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
@@ -145,6 +146,10 @@ public class ChessService {
                 String rawReport = new Gson().toJson(report);
                 throw new DataAccessException(rawReport);
             }
+            gameObj = gameObj.changeBlackUsername(null);
+            gameObj = gameObj.changeWhiteUsername(null);
+            gameObj = gameObj.changeGameName(null);
+            gameObj = gameObj.changeGame(null);
             return gameObj;
         } catch (DataAccessException e) {
             ServiceReport report = new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());

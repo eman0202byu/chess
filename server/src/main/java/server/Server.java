@@ -57,13 +57,12 @@ public class Server {
     // Clear application endpoint handler
     private Object clearDatabase(Request request, Response response) {
         var result = service.clearDatabase();
-        if (result == null) {
+        if (result.Status() == ChessService.StatusCodes.PASS) {
             response.status(200);
             return "";
         } else {
             response.status(500);
-            var output = new Gson().toJson(result);
-            return output;
+            return new Gson().toJson(ErrorReportGen(result));
         }
     }
 
@@ -72,40 +71,71 @@ public class Server {
         var user = new Gson().fromJson(request.body(), UserData.class);
         try {
             user = service.registerUser(user);
+            response.status(200);
+            return new Gson().toJson(user);
         } catch (DataAccessException e) {
-            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
-            response.status(501);
-            return null; //TODO:: IMPLEMENT
+            ServiceReport report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
+            if (report.Status() == ChessService.StatusCodes.BADREQUEST) {
+                response.status(400);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.UNAUTHORIZED) {
+                response.status(401);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.ALREADYTAKEN) {
+                response.status(403);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else {
+                response.status(500);
+                return new Gson().toJson(ErrorReportGen(report));
+            }
         }
-        response.status(200);
-        return new Gson().toJson(user);
     }
 
     // Login endpoint handler
     private Object loginUser(Request request, Response response) {
         var user = new Gson().fromJson(request.body(), UserData.class);
+        var auth = new AuthData(null, null);
         try {
-            var auth = service.loginUser(user);
+            auth = service.loginUser(user);
             response.status(200);
             return new Gson().toJson(auth);
         } catch (DataAccessException e) {
-            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
-            response.status(501);
-            return null; //TODO:: IMPLEMENT
+            ServiceReport report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
+            if (report.Status() == ChessService.StatusCodes.BADREQUEST) {
+                response.status(400);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.UNAUTHORIZED) {
+                response.status(401);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.ALREADYTAKEN) {
+                response.status(403);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else {
+                response.status(500);
+                return new Gson().toJson(ErrorReportGen(report));
+            }
         }
     }
 
     // Logout endpoint handler
     private Object logoutUser(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
-        var result = service.logoutUser(auth);
-        if (result == null) {
+        ServiceReport result = service.logoutUser(auth);
+        if (result.Status() == ChessService.StatusCodes.PASS) {
             response.status(200);
             return "";
+        } else if (result.Status() == ChessService.StatusCodes.BADREQUEST) {
+            response.status(400);
+            return new Gson().toJson(ErrorReportGen(result));
+        } else if (result.Status() == ChessService.StatusCodes.UNAUTHORIZED) {
+            response.status(401);
+            return new Gson().toJson(ErrorReportGen(result));
+        } else if (result.Status() == ChessService.StatusCodes.ALREADYTAKEN) {
+            response.status(403);
+            return new Gson().toJson(ErrorReportGen(result));
         } else {
             response.status(500);
-            var output = new Gson().toJson(result);
-            return output;
+            return new Gson().toJson(ErrorReportGen(result));
         }
     }
 
@@ -113,13 +143,25 @@ public class Server {
     private Object listGames(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
         try {
-            var list = service.listGames(auth).toArray();
+            var out = service.listGames(auth);
+            var outArray = out.toArray();
             response.status(200);
-            return new Gson().toJson(Map.of(MAPOFGAMEKEY, list));
+            return new Gson().toJson(Map.of(MAPOFGAMEKEY, outArray));
         } catch (DataAccessException e) {
-            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
-            response.status(501);
-            return null; //TODO:: IMPLEMENT
+            ServiceReport report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
+            if (report.Status() == ChessService.StatusCodes.BADREQUEST) {
+                response.status(400);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.UNAUTHORIZED) {
+                response.status(401);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.ALREADYTAKEN) {
+                response.status(403);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else {
+                response.status(500);
+                return new Gson().toJson(ErrorReportGen(report));
+            }
         }
     }
 
@@ -128,13 +170,24 @@ public class Server {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
         var gameName = new Gson().fromJson(request.body(), GameData.class);
         try {
-            var game = service.createGames(auth, gameName);
+            var out = service.createGames(auth, gameName);
             response.status(200);
-            return new Gson().toJson(game);
+            return new Gson().toJson(out);
         } catch (DataAccessException e) {
-            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
-            response.status(501);
-            return null; //TODO:: IMPLEMENT
+            ServiceReport report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
+            if (report.Status() == ChessService.StatusCodes.BADREQUEST) {
+                response.status(400);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.UNAUTHORIZED) {
+                response.status(401);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else if (report.Status() == ChessService.StatusCodes.ALREADYTAKEN) {
+                response.status(403);
+                return new Gson().toJson(ErrorReportGen(report));
+            } else {
+                response.status(500);
+                return new Gson().toJson(ErrorReportGen(report));
+            }
         }
     }
 
@@ -142,14 +195,29 @@ public class Server {
     private Object joinGame(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
         ColorAndID lookLeft = new Gson().fromJson(request.body(), ColorAndID.class);
-        var result = service.joinGames(auth, lookLeft.playerColor, lookLeft.gameID);
-        if (result == null) {
+        ServiceReport result = service.joinGames(auth, lookLeft.playerColor, lookLeft.gameID);
+        if (result.Status() == ChessService.StatusCodes.PASS) {
             response.status(200);
             return "";
+        } else if (result.Status() == ChessService.StatusCodes.BADREQUEST) {
+            response.status(400);
+            return new Gson().toJson(ErrorReportGen(result));
+        } else if (result.Status() == ChessService.StatusCodes.UNAUTHORIZED) {
+            response.status(401);
+            return new Gson().toJson(ErrorReportGen(result));
+        } else if (result.Status() == ChessService.StatusCodes.ALREADYTAKEN) {
+            response.status(403);
+            return new Gson().toJson(ErrorReportGen(result));
         } else {
             response.status(500);
-            var output = new Gson().toJson(result);
-            return output;
+            return new Gson().toJson(ErrorReportGen(result));
         }
+    }
+
+    private ErrorReport ErrorReportGen(ServiceReport result) {
+        String startString = "Error: " + result.Status().toString();
+        String endString = " :: " + result.ErrorLogging();
+        String out = startString + endString;
+        return new ErrorReport(out);
     }
 }
