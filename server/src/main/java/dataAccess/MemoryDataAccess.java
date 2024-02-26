@@ -177,7 +177,7 @@ public class MemoryDataAccess {
         String id = highestGameId.toString();
         highestGameId++;
         var gameInit = new ChessGame();
-        var output = new GameData(highestGameId, null, null, name, gameInit);
+        var output = new GameData(highestGameId, null, null, name, null);
         String game = new Gson().toJson(gameInit);
         Vector<String> push = new Vector<String>();
         push.add(id);
@@ -189,11 +189,12 @@ public class MemoryDataAccess {
         return output;
     }
 
-    public String joinGame(ChessGame.TeamColor color, String id, String username) throws DataAccessException {
+    public String joinGame(ChessGame.TeamColor color, String id, String token) throws DataAccessException {
         var game = games.get(id);
         if (game == null) {
             throw new DataAccessException(NULL_RESULT_EXCEPTION);
         }
+        var username = auth.get(token).elementAt(1);
         if (color == ChessGame.TeamColor.WHITE) {
             if (game.elementAt(1) != null) {
                 throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);

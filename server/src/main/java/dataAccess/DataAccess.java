@@ -18,10 +18,18 @@ public class DataAccess {
     public final String FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION = "AUTH_TABLE_KILL_ERROR";
     public final String FAILURE_TO_DELETE_USER_TABLE_EXCEPTION = "USER_TABLE_KILL_ERROR";
     public final String FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION = "GAME_TABLE_KILL_ERROR";
+
+    public final String DB_NULL_RESULT_EXCEPTION;
+    public final String DB_ALREADY_EXISTS_EXCEPTION;
+
+    public final String DB_UNABLE_TO_REMOVE_EXCEPTION;
     public final Integer MAXIMUM_AUTHTOKENS_PER_USER = 10;
 
     public DataAccess() {
         database = new MemoryDataAccess();
+        DB_NULL_RESULT_EXCEPTION = database.NULL_RESULT_EXCEPTION;
+        DB_ALREADY_EXISTS_EXCEPTION = database.ALREADY_EXISTS_EXCEPTION;
+        DB_UNABLE_TO_REMOVE_EXCEPTION = database.UNABLE_TO_REMOVE_EXCEPTION;
     }
 
     public UserData getUser(UserData user) throws DataAccessException {
@@ -125,9 +133,10 @@ public class DataAccess {
         return database.addGame(name);
     }
 
-    public GameData joinGame(ChessGame.TeamColor color, Integer id, String username) throws DataAccessException {
+    public GameData joinGame(ChessGame.TeamColor color, Integer id, AuthData auth) throws DataAccessException {
         String strId = id.toString();
-        String newStrId = database.joinGame(color, strId, username);
+        String token = auth.authToken();
+        String newStrId = database.joinGame(color, strId, token);
         if (newStrId == null) {
             throw new DataAccessException(JOIN_GAME_EXCEPTION);
         } else {

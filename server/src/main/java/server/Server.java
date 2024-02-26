@@ -73,6 +73,7 @@ public class Server {
         try {
             user = service.registerUser(user);
         } catch (DataAccessException e) {
+            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
             response.status(501);
             return null; //TODO:: IMPLEMENT
         }
@@ -88,6 +89,7 @@ public class Server {
             response.status(200);
             return new Gson().toJson(auth);
         } catch (DataAccessException e) {
+            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
             response.status(501);
             return null; //TODO:: IMPLEMENT
         }
@@ -115,6 +117,7 @@ public class Server {
             response.status(200);
             return new Gson().toJson(Map.of(MAPOFGAMEKEY, list));
         } catch (DataAccessException e) {
+            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
             response.status(501);
             return null; //TODO:: IMPLEMENT
         }
@@ -123,12 +126,13 @@ public class Server {
     // Create game endpoint handler
     private Object createGame(Request request, Response response) {
         var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
-        var gameName = new Gson().fromJson(request.body(), AuthData.class);
+        var gameName = new Gson().fromJson(request.body(), GameData.class);
         try {
             var game = service.createGames(auth, gameName);
             response.status(200);
             return new Gson().toJson(game);
         } catch (DataAccessException e) {
+            var report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
             response.status(501);
             return null; //TODO:: IMPLEMENT
         }
