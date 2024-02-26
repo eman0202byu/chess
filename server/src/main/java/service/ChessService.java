@@ -37,7 +37,7 @@ public class ChessService {
         }
     }
 
-    public UserData registerUser(UserData user) throws DataAccessException {
+    public AuthData registerUser(UserData user) throws DataAccessException {
         String name = user.username();
         String pass = user.password();
         String mail = user.email();
@@ -48,14 +48,20 @@ public class ChessService {
         }
         try {
             var userObj = dataAccess.createUser(user);
+            var authObj = dataAccess.createAuth(user);
             if (userObj == null) {
                 ServiceReport report = new ServiceReport(StatusCodes.EXTREME_ERROR, "ERROR::ChessService::Line:50::userObj==null::true");
                 String rawReport = new Gson().toJson(report);
                 throw new DataAccessException(rawReport);
             }
             userObj = userObj.changeEmail(null);
-            return userObj;
+            return authObj;
         } catch (DataAccessException e) {
+            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
+                ServiceReport report = new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+                String rawReport = new Gson().toJson(report);
+                throw new DataAccessException(rawReport);
+            }
             ServiceReport report = new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
             String rawReport = new Gson().toJson(report);
             throw new DataAccessException(rawReport);
@@ -67,6 +73,13 @@ public class ChessService {
         String pass = user.password();
         if (name == null || pass == null) {
             ServiceReport report = new ServiceReport(StatusCodes.EXTREME_ERROR, BAD_REQUEST_OUTSIDE_OF_SPEC_EXCEPTION);
+            String rawReport = new Gson().toJson(report);
+            throw new DataAccessException(rawReport);
+        }
+        try {
+            dataAccess.getAccount(user);
+        } catch (DataAccessException e) {
+            ServiceReport report = new ServiceReport(StatusCodes.UNAUTHORIZED, e.getMessage());
             String rawReport = new Gson().toJson(report);
             throw new DataAccessException(rawReport);
         }
@@ -160,7 +173,7 @@ public class ChessService {
 
     public ServiceReport joinGames(AuthData auth, ChessGame.TeamColor color, Integer id) {
         String token = auth.authToken();
-        if (token == null || color == null || id == null) {
+        if (token == null || id == null) {
             return new ServiceReport(StatusCodes.BADREQUEST, null);
         }
         try {
@@ -182,6 +195,8 @@ public class ChessService {
         } catch (DataAccessException e) {
             if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
                 return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
             } else {
                 return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
             }

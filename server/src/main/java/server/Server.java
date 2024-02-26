@@ -69,9 +69,9 @@ public class Server {
     private Object registerUser(Request request, Response response) {
         var user = new Gson().fromJson(request.body(), UserData.class);
         try {
-            user = service.registerUser(user);
+            var auth = service.registerUser(user);
             response.status(200);
-            return new Gson().toJson(user);
+            return new Gson().toJson(auth);
         } catch (DataAccessException e) {
             ServiceReport report = new Gson().fromJson(e.getMessage(), ServiceReport.class);
             if (report.Status() == ChessService.StatusCodes.BADREQUEST) {
@@ -118,7 +118,8 @@ public class Server {
 
     // Logout endpoint handler
     private Object logoutUser(Request request, Response response) {
-        var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
+        var token = request.headers(AUTHTOKENHEADER);
+        var auth = new AuthData(token, null);
         ServiceReport result = service.logoutUser(auth);
         if (result.Status() == ChessService.StatusCodes.PASS) {
             response.status(200);
@@ -140,7 +141,8 @@ public class Server {
 
     // List games endpoint handler
     private Object listGames(Request request, Response response) {
-        var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
+        var token = request.headers(AUTHTOKENHEADER);
+        var auth = new AuthData(token, null);
         try {
             var out = service.listGames(auth);
             var outArray = out.toArray();
@@ -166,8 +168,9 @@ public class Server {
 
     // Create game endpoint handler
     private Object createGame(Request request, Response response) {
-        var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
+        var token = request.headers(AUTHTOKENHEADER);
         var gameName = new Gson().fromJson(request.body(), GameData.class);
+        var auth = new AuthData(token, null);
         try {
             var out = service.createGames(auth, gameName);
             response.status(200);
@@ -192,8 +195,9 @@ public class Server {
 
     // Join game endpoint handler
     private Object joinGame(Request request, Response response) {
-        var auth = new Gson().fromJson(request.headers(AUTHTOKENHEADER), AuthData.class);
+        var token = request.headers(AUTHTOKENHEADER);
         ColorAndID lookLeft = new Gson().fromJson(request.body(), ColorAndID.class);
+        var auth = new AuthData(token, null);
         ServiceReport result = service.joinGames(auth, lookLeft.playerColor, lookLeft.gameID);
         if (result.Status() == ChessService.StatusCodes.PASS) {
             response.status(200);

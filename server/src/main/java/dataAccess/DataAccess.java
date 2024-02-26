@@ -65,7 +65,14 @@ public class DataAccess {
     }
 
     private String genAuth(String source) {
-        return Base64.getEncoder().encodeToString(source.getBytes());
+        String dirtyOutput = Base64.getEncoder().encodeToString(source.getBytes());
+        return dirtyOutput.replaceAll("\\\\", "X");
+    }
+
+    public UserData getAccount(UserData user) throws DataAccessException {
+        String username = user.username();
+        String password = user.password();
+        return database.getAccount(username, password);
     }
 
     public AuthData killAuth(AuthData auth) throws DataAccessException {
@@ -101,14 +108,12 @@ public class DataAccess {
         HashSet<GameData> output = new HashSet<>();
         Vector<Vector<String>> rawOutput = database.getActiveGames();
         for (int i = 0; i < rawOutput.size(); i++) {
-            if (rawOutput.elementAt(i).size() == 4) {
-                String strId = rawOutput.elementAt(i).elementAt(0);
-                String white = rawOutput.elementAt(i).elementAt(1);
-                String black = rawOutput.elementAt(i).elementAt(2);
-                String name = rawOutput.elementAt(i).elementAt(3);
-                int id = Integer.parseInt(strId);
-                output.add(new GameData(id, white, black, name, null));
-            }
+            String strId = rawOutput.elementAt(i).elementAt(0);
+            String white = rawOutput.elementAt(i).elementAt(1);
+            String black = rawOutput.elementAt(i).elementAt(2);
+            String name = rawOutput.elementAt(i).elementAt(3);
+            int id = Integer.parseInt(strId);
+            output.add(new GameData(id, white, black, name, null));
         }
         return output;
     }

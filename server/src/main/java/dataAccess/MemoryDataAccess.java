@@ -16,7 +16,7 @@ public class MemoryDataAccess {
     private HashMap<String, Vector<String>> games = new HashMap<>();
     //users::Username is Key
     private HashMap<String, Vector<String>> users = new HashMap<>();
-    private Integer highestGameId = 0;
+    private Integer highestGameId = 1;
     public final String NULL_RESULT_EXCEPTION;
     public final String ALREADY_EXISTS_EXCEPTION;
     public final String UNABLE_TO_REMOVE_EXCEPTION;
@@ -46,6 +46,23 @@ public class MemoryDataAccess {
         return result;
     }
 
+    public UserData getAccount(String username, String password) throws DataAccessException {
+        UserData result = new UserData(null, null, null);
+        var strUserData = users.get(username);
+        if (strUserData == null) {
+            throw new DataAccessException(NULL_RESULT_EXCEPTION);
+        } else {
+            if (!strUserData.elementAt(1).equals(password)) {
+                throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
+            } else {
+                result = result.changeUsername(strUserData.elementAt(0));
+                result = result.changePassword(strUserData.elementAt(1));
+                result = result.changeEmail(strUserData.elementAt(2));
+            }
+        }
+        return result;
+    }
+
     public AuthData createAuth(String username, String key) throws DataAccessException {
         AuthData result = new AuthData(null, null);
         var strAuthData = auth.get(key);
@@ -55,7 +72,7 @@ public class MemoryDataAccess {
             Vector<String> newAuth = new Vector<>();
             newAuth.add(key);
             newAuth.add(username);
-            users.put(key, newAuth);
+            auth.put(key, newAuth);
         }
         strAuthData = auth.get(key);
         result = result.changeAuthToken(strAuthData.elementAt(0));
@@ -120,10 +137,10 @@ public class MemoryDataAccess {
 
     public GameData addGame(String name) {
         String id = highestGameId.toString();
-        highestGameId++;
         var gameInit = new ChessGame();
         var output = new GameData(highestGameId, null, null, name, null);
         String game = new Gson().toJson(gameInit);
+        highestGameId++;
         Vector<String> push = new Vector<>();
         push.add(id);
         push.add(null);
