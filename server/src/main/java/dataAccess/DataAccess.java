@@ -13,11 +13,11 @@ import chess.ChessGame;
 
 public class DataAccess {
     private MemoryDataAccess database;
-    public final String JOIN_GAME_EXCEPTION = "NULL_GAME_ID";
-    public final String JAVA_IS_BROKEN_EXCEPTION = "JAVA_LOGIC_ERROR";
-    public final String FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION = "AUTH_TABLE_KILL_ERROR";
-    public final String FAILURE_TO_DELETE_USER_TABLE_EXCEPTION = "USER_TABLE_KILL_ERROR";
-    public final String FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION = "GAME_TABLE_KILL_ERROR";
+    public final String JOIN_GAME_EXCEPTION;
+    public final String JAVA_IS_BROKEN_EXCEPTION;
+    public final String FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION;
+    public final String FAILURE_TO_DELETE_USER_TABLE_EXCEPTION;
+    public final String FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION;
 
     public final String DB_NULL_RESULT_EXCEPTION;
     public final String DB_ALREADY_EXISTS_EXCEPTION;
@@ -26,15 +26,16 @@ public class DataAccess {
     public final Integer MAXIMUM_AUTHTOKENS_PER_USER = 10;
 
     public DataAccess() {
+        JOIN_GAME_EXCEPTION = "NULL_GAME_ID";
+        JAVA_IS_BROKEN_EXCEPTION = "JAVA_LOGIC_ERROR";
+        FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION = "AUTH_TABLE_KILL_ERROR";
+        FAILURE_TO_DELETE_USER_TABLE_EXCEPTION = "USER_TABLE_KILL_ERROR";
+        FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION = "GAME_TABLE_KILL_ERROR";
+
         database = new MemoryDataAccess();
         DB_NULL_RESULT_EXCEPTION = database.NULL_RESULT_EXCEPTION;
         DB_ALREADY_EXISTS_EXCEPTION = database.ALREADY_EXISTS_EXCEPTION;
         DB_UNABLE_TO_REMOVE_EXCEPTION = database.UNABLE_TO_REMOVE_EXCEPTION;
-    }
-
-    public UserData getUser(UserData user) throws DataAccessException {
-        String username = user.username();
-        return database.getUser(username);
     }
 
     public UserData createUser(UserData user) throws DataAccessException {
@@ -67,25 +68,9 @@ public class DataAccess {
         return Base64.getEncoder().encodeToString(source.getBytes());
     }
 
-    public UserData getAccount(UserData user) throws DataAccessException {
-        String username = user.username();
-        String password = user.password();
-        return database.getAccount(username, password);
-    }
-
     public AuthData killAuth(AuthData auth) throws DataAccessException {
         String key = auth.authToken();
         return database.killAuth(key);
-    }
-
-    public UserData killUser(UserData user) throws DataAccessException {
-        String key = user.username();
-        return database.killUser(key);
-    }
-
-    public GameData killGame(GameData game) throws DataAccessException {
-        String key = game.gameID().toString();
-        return database.killGame(key);
     }
 
     public boolean killEverything() throws DataAccessException {
@@ -113,7 +98,7 @@ public class DataAccess {
     }
 
     public HashSet<GameData> listActive() throws DataAccessException {
-        HashSet<GameData> output = new HashSet<GameData>();
+        HashSet<GameData> output = new HashSet<>();
         Vector<Vector<String>> rawOutput = database.getActiveGames();
         for (int i = 0; i < rawOutput.size(); i++) {
             if (rawOutput.elementAt(i).size() == 4) {

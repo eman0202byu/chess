@@ -6,35 +6,25 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import javax.xml.crypto.Data;
-import java.util.Collection;
 import java.util.Vector;
 import java.util.HashMap;
 
 public class MemoryDataAccess {
     //auth::AuthToken is Key
-    private HashMap<String, Vector<String>> auth;
+    private HashMap<String, Vector<String>> auth = new HashMap<>();
     //games::GameID is Key
-    private HashMap<String, Vector<String>> games;
+    private HashMap<String, Vector<String>> games = new HashMap<>();
     //users::Username is Key
-    private HashMap<String, Vector<String>> users;
+    private HashMap<String, Vector<String>> users = new HashMap<>();
     private Integer highestGameId = 0;
-    public final String NULL_RESULT_EXCEPTION = "NULL_RESULT";
-    public final String ALREADY_EXISTS_EXCEPTION = "ALREADY_EXISTS";
+    public final String NULL_RESULT_EXCEPTION;
+    public final String ALREADY_EXISTS_EXCEPTION;
+    public final String UNABLE_TO_REMOVE_EXCEPTION;
 
-    public final String UNABLE_TO_REMOVE_EXCEPTION = "FAILURE_TO_REMOVE";
-
-    public UserData getUser(String username) throws DataAccessException {
-        UserData result = new UserData(null, null, null);
-        var strUserData = users.get(username);
-        if (strUserData == null) {
-            throw new DataAccessException(NULL_RESULT_EXCEPTION);
-        } else {
-            result = result.changeUsername(strUserData.elementAt(0));
-            result = result.changePassword(strUserData.elementAt(1));
-            result = result.changeEmail(strUserData.elementAt(2));
-        }
-        return result;
+    public MemoryDataAccess() {
+        NULL_RESULT_EXCEPTION = "NULL_RESULT";
+        ALREADY_EXISTS_EXCEPTION = "ALREADY_EXISTS";
+        UNABLE_TO_REMOVE_EXCEPTION = "FAILURE_TO_REMOVE";
     }
 
     public UserData createUser(String username, String password, String email) throws DataAccessException {
@@ -43,7 +33,7 @@ public class MemoryDataAccess {
         if (strUserData != null) {
             throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
         } else {
-            Vector<String> newUser = new Vector<String>();
+            Vector<String> newUser = new Vector<>();
             newUser.add(username);
             newUser.add(password);
             newUser.add(email);
@@ -62,7 +52,7 @@ public class MemoryDataAccess {
         if (strAuthData != null) {
             throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
         } else {
-            Vector<String> newAuth = new Vector<String>();
+            Vector<String> newAuth = new Vector<>();
             newAuth.add(key);
             newAuth.add(username);
             users.put(key, newAuth);
@@ -73,23 +63,6 @@ public class MemoryDataAccess {
         return result;
     }
 
-    public UserData getAccount(String username, String password) throws DataAccessException {
-        UserData result = new UserData(null, null, null);
-        var strUserData = users.get(username);
-        if (strUserData == null) {
-            throw new DataAccessException(NULL_RESULT_EXCEPTION);
-        } else {
-            if (strUserData.elementAt(1) != password) {
-                throw new DataAccessException(NULL_RESULT_EXCEPTION);
-            } else {
-                result = result.changeUsername(strUserData.elementAt(0));
-                result = result.changePassword(strUserData.elementAt(1));
-                result = result.changeEmail(strUserData.elementAt(2));
-            }
-        }
-        return result;
-    }
-
     public AuthData killAuth(String key) throws DataAccessException {
         AuthData result = new AuthData(null, null);
         var strAuthData = auth.get(key);
@@ -97,34 +70,6 @@ public class MemoryDataAccess {
             throw new DataAccessException(NULL_RESULT_EXCEPTION);
         } else {
             if (auth.remove(key, strAuthData)) {
-                return result;
-            } else {
-                throw new DataAccessException(UNABLE_TO_REMOVE_EXCEPTION);
-            }
-        }
-    }
-
-    public UserData killUser(String key) throws DataAccessException {
-        UserData result = new UserData(null, null, null);
-        var strUserData = users.get(key);
-        if (strUserData == null) {
-            throw new DataAccessException(NULL_RESULT_EXCEPTION);
-        } else {
-            if (users.remove(key, strUserData)) {
-                return result;
-            } else {
-                throw new DataAccessException(UNABLE_TO_REMOVE_EXCEPTION);
-            }
-        }
-    }
-
-    public GameData killGame(String key) throws DataAccessException {
-        GameData result = new GameData(null, null, null, null, null);
-        var strGameData = games.get(key);
-        if (strGameData == null) {
-            throw new DataAccessException(NULL_RESULT_EXCEPTION);
-        } else {
-            if (games.remove(key, strGameData)) {
                 return result;
             } else {
                 throw new DataAccessException(UNABLE_TO_REMOVE_EXCEPTION);
@@ -170,7 +115,7 @@ public class MemoryDataAccess {
         if (result == null) {
             throw new DataAccessException(NULL_RESULT_EXCEPTION);
         }
-        return new Vector<Vector<String>>(result);
+        return new Vector<>(result);
     }
 
     public GameData addGame(String name) {
@@ -179,7 +124,7 @@ public class MemoryDataAccess {
         var gameInit = new ChessGame();
         var output = new GameData(highestGameId, null, null, name, null);
         String game = new Gson().toJson(gameInit);
-        Vector<String> push = new Vector<String>();
+        Vector<String> push = new Vector<>();
         push.add(id);
         push.add(null);
         push.add(null);

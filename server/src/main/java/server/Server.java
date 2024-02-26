@@ -2,7 +2,6 @@ package server;
 
 import java.util.*;
 
-import chess.ChessGame;
 import dataAccess.DataAccessException;
 import model.*;
 import service.*;
