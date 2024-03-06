@@ -12,7 +12,7 @@ import java.util.Vector;
 import chess.ChessGame;
 
 public class DataAccess {
-    private MemoryDataAccess database;
+    private MySqlDataAccess database;
     public final String JOIN_GAME_EXCEPTION;
     public final String JAVA_IS_BROKEN_EXCEPTION;
     public final String FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION;
@@ -25,14 +25,14 @@ public class DataAccess {
     public final String DB_UNABLE_TO_REMOVE_EXCEPTION;
     public final Integer MAXIMUM_AUTHTOKENS_PER_USER = 10;
 
-    public DataAccess() {
+    public DataAccess() throws DataAccessException {
         JOIN_GAME_EXCEPTION = "NULL_GAME_ID";
         JAVA_IS_BROKEN_EXCEPTION = "JAVA_LOGIC_ERROR";
         FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION = "AUTH_TABLE_KILL_ERROR";
         FAILURE_TO_DELETE_USER_TABLE_EXCEPTION = "USER_TABLE_KILL_ERROR";
         FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION = "GAME_TABLE_KILL_ERROR";
 
-        database = new MemoryDataAccess();
+        database = new MySqlDataAccess();
         DB_NULL_RESULT_EXCEPTION = database.NULL_RESULT_EXCEPTION;
         DB_ALREADY_EXISTS_EXCEPTION = database.ALREADY_EXISTS_EXCEPTION;
         DB_UNABLE_TO_REMOVE_EXCEPTION = database.UNABLE_TO_REMOVE_EXCEPTION;

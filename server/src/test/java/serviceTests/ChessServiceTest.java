@@ -26,7 +26,7 @@ class ChessServiceTest {
     private final String GOOD_GAMENAME = "Just the Bois 日本語があります！";
 
     @Test
-    void clearDatabase() {
+    void clearDatabase() throws DataAccessException {
         ChessService currTesting = new ChessService();
         DataAccess exceptionsGrab = new DataAccess();
 
@@ -34,7 +34,7 @@ class ChessServiceTest {
     }
 
     @Test
-    void clearDatabaseNOT() {
+    void clearDatabaseNOT() throws DataAccessException {
         ChessService currTesting = new ChessService();
         DataAccess exceptionsGrab = new DataAccess();
 

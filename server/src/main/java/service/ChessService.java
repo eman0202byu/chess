@@ -18,13 +18,19 @@ public class ChessService {
         ALREADYTAKEN,
         PASS,
         DATAACCESSFAILURE,
-        EXTREME_ERROR
+        EXTREME_ERROR,
     }
 
     public final String BAD_REQUEST_OUTSIDE_OF_SPEC_EXCEPTION = "BADREQUEST_BUT_BADREQUEST_IS_OUTSIDE_OF_SPEC";
 
-    public ChessService() {
-        dataAccess = new DataAccess();
+    public ChessService() throws DataAccessException {
+        try {
+            dataAccess = new DataAccess();
+        } catch (DataAccessException e) {
+            ServiceReport report = new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
+            String rawReport = new Gson().toJson(report);
+            throw new DataAccessException(rawReport);
+        }
     }
 
 

@@ -15,7 +15,12 @@ public class Server {
     private final String MAPOFGAMEKEY = "games";
 
     public Server() {
-        service = new ChessService();
+        try {
+            service = new ChessService();
+        } catch (DataAccessException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public int run(int desiredPort) {
