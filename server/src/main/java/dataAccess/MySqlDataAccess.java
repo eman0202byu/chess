@@ -21,26 +21,30 @@ public class MySqlDataAccess {
 
     public final String FAILURE_TO_MAKE_DB_EXCEPTION;
     private final String[] ALL_TABLE_ARGS = {
-            "CREATE TABLE `user` (",
-            "  `id` INT AUTO_INCREMENT PRIMARY KEY,",
-            "  `username` VARCHAR(256) UNIQUE NOT NULL,",
-            "  `password` VARCHAR(256) NOT NULL,",
-            "  `email` VARCHAR(256) NOT NULL",
-            ");",
-            "",
-            "CREATE TABLE `games` (",
-            "  `id` INT AUTO_INCREMENT PRIMARY KEY,",
-            "  `white` VARCHAR(256) NOT NULL,",
-            "  `black` VARCHAR(256) NOT NULL,",
-            "  `gameName` VARCHAR(256) NOT NULL,",
-            "  `game` TEXT", //JSON Serialization of ChessGame
-            ");",
-            "",
-            "CREATE TABLE `auth` (",
-            "  `id` INT AUTO_INCREMENT PRIMARY KEY,",
-            "  `username` VARCHAR(256) NOT NULL,",
-            "  `token` VARCHAR(256) NOT NULL",
-            ");"
+            """
+              CREATE TABLE IF NOT EXISTS `user` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `username` VARCHAR(256) UNIQUE NOT NULL,
+              `password` VARCHAR(256) NOT NULL,
+              `email` VARCHAR(256) NOT NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS `games` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `white` VARCHAR(256),
+              `black` VARCHAR(256),
+              `gameName` VARCHAR(256) NOT NULL,
+              `game` TEXT
+            );
+            """, //`game` TEXT, -> JSON Serialization of ChessGame
+            """
+            CREATE TABLE IF NOT EXISTS `auth` (
+              `id` INT AUTO_INCREMENT PRIMARY KEY,
+              `username` VARCHAR(256) NOT NULL,
+              `token` VARCHAR(256) NOT NULL
+            );
+            """
     };
 
     public MySqlDataAccess() throws DataAccessException {
