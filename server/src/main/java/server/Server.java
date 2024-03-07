@@ -19,7 +19,7 @@ public class Server {
             service = new ChessService();
         } catch (DataAccessException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
