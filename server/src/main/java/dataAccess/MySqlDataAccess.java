@@ -81,7 +81,24 @@ public class MySqlDataAccess {
         arguments.add(username);
         arguments.add(password);
         arguments.add(email);
-        execUpdate(result, statement, arguments);
+        Vector<String> strUserData;
+        try {
+            strUserData = execUpdate(result, statement, arguments);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 1062) {
+                throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
+            } else {
+                String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+                throw new DataAccessException(out);
+            }
+        } catch (DataAccessException e) {
+            String out = FAILURE_TO_GET_CONNECTION_TO_DB_EXCEPTION + " :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        result = result.changeUsername(strUserData.elementAt(1));
+        result = result.changePassword(strUserData.elementAt(2));
+        result = result.changeEmail(strUserData.elementAt(3));
         return result;
     }
 
@@ -99,16 +116,16 @@ public class MySqlDataAccess {
 
     }
 
-    public void killAllAuth() throws DataAccessException {
-
-    }
-
-    public void killAllUser() throws DataAccessException {
-        //truncate user
-    }
-
-    public void killAllGame() throws DataAccessException {
-
+    public void killTable(String table) throws DataAccessException {
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(table);
+        String statement = "TRUNCATE TABLE ";
+        try {
+            execUpdate(null, statement, arguments);
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
     }
 
     public AuthData getAuth(String token) throws DataAccessException {
@@ -127,44 +144,35 @@ public class MySqlDataAccess {
         return null;
     }
 
-    private Object execUpdate(Object passThrough, String statement, Vector<String> arguments) throws DataAccessException {
-        if (passThrough instanceof AuthData result) {
+    private Vector<String> execUpdate(Object passThrough, String statement, Vector<String> arguments) throws DataAccessException, SQLException {
+        if (passThrough == null) {
+            String finalStatement = statement + arguments.elementAt(0);
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.executeUpdate();
+        } else if (passThrough instanceof AuthData) {
 
-        } else if (passThrough instanceof GameData result) {
+        } else if (passThrough instanceof GameData) {
 
-        } else if (passThrough instanceof UserData result) {
-            String username = arguments.elementAt(0);
-            ;
-            String password = arguments.elementAt(1);
-            String email = arguments.elementAt(2);
-
-            try (
-                    PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS)
-            ) {
-                preparedStatement.setString(1, username);
-                result = result.changeUsername(username);
-                preparedStatement.setString(2, password);
-                result = result.changePassword(password);
-                preparedStatement.setString(3, email);
-                result = result.changeEmail(email);
-                preparedStatement.executeUpdate();
-                var set = preparedStatement.getGeneratedKeys();
-                set.next();
-                var id = set.getInt(1);
-                //NULL_RESULT_EXCEPTION
-
-            } catch (SQLException e) {
-                var check = e.getErrorCode();
-                if (check == 1062 || check == 1586) {
-                    throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
-                } else {
-                    String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
-                    throw new DataAccessException(out);
-                }
-            } catch (DataAccessException e) {
-                String out = FAILURE_TO_GET_CONNECTION_TO_DB_EXCEPTION + " :: " + e.getMessage();
-                throw new DataAccessException(out);
+        } else if (passThrough instanceof UserData) {
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+            for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
+                preparedStatement.setString(i, arguments.elementAt(i - 1));
             }
+            preparedStatement.executeUpdate();
+            var set = preparedStatement.getGeneratedKeys();
+            set.next();
+            Integer id = set.getInt(1);
+            String validateStatement = "SELECT * FROM user WHERE id = '" + id + "'";
+            PreparedStatement valPreparedStatement = DatabaseManager.getConnection().prepareStatement(validateStatement, RETURN_GENERATED_KEYS);
+            set = valPreparedStatement.executeQuery();
+            set.next();
+            Vector<String> output = new Vector<>();
+            output.add(id.toString());
+            output.add(set.getString(2));
+            output.add(set.getString(3));
+            output.add(set.getString(4));
+
+            return output;
         } else {
             throw new DataAccessException(INVALID_TYPING_IN_CODE);
         }

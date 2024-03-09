@@ -82,19 +82,19 @@ public class DataAccess {
 
     public boolean killEverything() throws DataAccessException {
         try {
-            database.killAllAuth();
-        } catch (DataAccessException e) {
-            throw new DataAccessException(FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION);
-        }
-        try {
-            database.killAllUser();
+            database.killTable("user");
         } catch (DataAccessException e) {
             throw new DataAccessException(FAILURE_TO_DELETE_USER_TABLE_EXCEPTION);
         }
         try {
-            database.killAllGame();
+            database.killTable("games");
         } catch (DataAccessException e) {
             throw new DataAccessException(FAILURE_TO_DELETE_GAME_TABLE_EXCEPTION);
+        }
+        try {
+            database.killTable("auth");
+        } catch (DataAccessException e) {
+            throw new DataAccessException(FAILURE_TO_DELETE_AUTH_TABLE_EXCEPTION);
         }
         return true;
     }
