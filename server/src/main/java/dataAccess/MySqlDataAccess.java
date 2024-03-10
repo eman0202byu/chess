@@ -281,9 +281,57 @@ public class MySqlDataAccess {
     public String joinGame(ChessGame.TeamColor color, String id, String token) throws DataAccessException {
         String statement;
         if (color == ChessGame.TeamColor.WHITE) {
+            try {
+                String finalStatement = "SELECT white FROM games WHERE id = ?";
+                PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+                preparedStatement.setInt(1, Integer.parseInt(id));
+                var set = preparedStatement.executeQuery();
+                set.next();
+                String output = set.getString(1);
+                if (output != null) {
+                    throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
+                }
+            } catch (SQLException e) {
+                //
+            }
+
+
             statement = "UPDATE games SET " + "white" + " = ? WHERE id = ?";
-        } else {
+
+        } else if (color == ChessGame.TeamColor.BLACK) {
+            try {
+                String finalStatement = "SELECT black FROM games WHERE id = ?";
+                PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+                preparedStatement.setInt(1, Integer.parseInt(id));
+                var set = preparedStatement.executeQuery();
+                set.next();
+                String output = set.getString(1);
+                if (output != null) {
+                    throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
+                }
+            } catch (SQLException e) {
+                //
+            }
+
             statement = "UPDATE games SET " + "black" + " = ? WHERE id = ?";
+        } else {
+            try {
+                String finalStatement = "SELECT * FROM games WHERE id = ?";
+                PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+                preparedStatement.setInt(1, Integer.parseInt(id));
+                var set = preparedStatement.executeQuery();
+                set.next();
+                Integer output = set.getInt(1);
+                return output.toString();
+            } catch (SQLException e) {
+                var check = e.getErrorCode();
+                if (check == 0) {
+                    throw new DataAccessException(NULL_RESULT_EXCEPTION);
+                } else {
+                    String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+                    throw new DataAccessException(out);
+                }
+            }
         }
         String name = getAuth(token).username();
         Integer intID = Integer.parseInt(id);
@@ -297,13 +345,15 @@ public class MySqlDataAccess {
     }
 
     private String execJoin(String statement, Integer id, String name) throws DataAccessException, SQLException {
-        PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+        PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement);
 
         preparedStatement.setInt(2, id);
         preparedStatement.setString(1, name);
-
-        Integer outId = preparedStatement.executeUpdate();
-        return outId.toString();
+        int rowsAffected = preparedStatement.executeUpdate();
+        if (rowsAffected == 0) {
+            throw new DataAccessException(NULL_RESULT_EXCEPTION);
+        }
+        return id.toString();
     }
 
     private Vector<Vector<String>> execActiveGames(String statement) throws DataAccessException, SQLException {
