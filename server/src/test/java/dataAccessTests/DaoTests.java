@@ -16,7 +16,14 @@ class DaoTests {
     final private String USER = "Jack";
     final private String PASS = "password";
     final private String MAIL = "a@cat.com";
+    final private String BAD_PASS = "Password";
     final private UserData userData = new UserData(USER, PASS, MAIL);
+    final private UserData userDataBad = new UserData(USER, BAD_PASS, MAIL);
+
+    final private String DIFF_USER = "John";
+    final private String DIFF_PASS = "asdfghjkl";
+    final private String DIFF_MAIL = "b@cat.com";
+    final private UserData userDataDiff = new UserData(DIFF_USER, DIFF_PASS, DIFF_MAIL);
 
     @Test
     void killEverything() throws DataAccessException {
@@ -37,7 +44,8 @@ class DaoTests {
         DataAccess currTesting = new DataAccess();
         currTesting.killEverything();
 
-        assertDoesNotThrow(() -> currTesting.createUser(userData));
+        currTesting.createUser(userData);
+        assertThrows(DataAccessException.class, () -> currTesting.createUser(userData));
     }
 
     @Test
@@ -45,8 +53,26 @@ class DaoTests {
         DataAccess currTesting = new DataAccess();
         currTesting.killEverything();
 
+        assertDoesNotThrow(() -> currTesting.createUser(userData));
+    }
+
+    @Test
+    void getAccount() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
         currTesting.createUser(userData);
-        assertThrows(DataAccessException.class, () -> currTesting.createUser(userData));
+        assertThrows(DataAccessException.class, () -> currTesting.getAccount(userDataBad));
+        assertThrows(DataAccessException.class, () -> currTesting.getAccount(userDataDiff));
+    }
+
+    @Test
+    void getAccountNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        assertDoesNotThrow(() -> currTesting.getAccount(userData));
     }
 
 }

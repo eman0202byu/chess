@@ -104,7 +104,46 @@ public class MySqlDataAccess {
 
 
     public UserData getAccount(String username, String password) throws DataAccessException {
-        return null;
+        UserData result = new UserData(null, null, null);
+        String statement = "SELECT * FROM user WHERE username COLLATE utf8mb4_bin = ?";
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(username);
+        arguments.add(password);
+        Vector<String> strUserData;
+        try {
+            execQuery(result, statement, arguments);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 0) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            } else {
+                String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+                throw new DataAccessException(out);
+            }
+        } catch (DataAccessException e) {
+            String out = FAILURE_TO_GET_CONNECTION_TO_DB_EXCEPTION + " :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        statement = "SELECT * FROM user WHERE username COLLATE utf8mb4_bin = ? AND password COLLATE utf8mb4_bin = ?";
+        try {
+            strUserData = execQuery(result, statement, arguments);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 0) {
+                throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
+            } else {
+                String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+                throw new DataAccessException(out);
+            }
+        } catch (DataAccessException e) {
+            String out = FAILURE_TO_GET_CONNECTION_TO_DB_EXCEPTION + " :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        if (strUserData == null) {
+            throw new DataAccessException(NULL_RESULT_EXCEPTION);
+        }
+
+        return result;
     }
 
     public AuthData createAuth(String username, String key) throws DataAccessException {
@@ -167,6 +206,36 @@ public class MySqlDataAccess {
             set = valPreparedStatement.executeQuery();
             set.next();
             Vector<String> output = new Vector<>();
+            output.add(id.toString());
+            output.add(set.getString(2));
+            output.add(set.getString(3));
+            output.add(set.getString(4));
+
+            return output;
+        } else {
+            throw new DataAccessException(INVALID_TYPING_IN_CODE);
+        }
+        return null;
+    }
+
+    private Vector<String> execQuery(Object passThrough, String statement, Vector<String> arguments) throws DataAccessException, SQLException {
+        if (passThrough == null) {
+            String finalStatement = statement + arguments.elementAt(0);
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.executeQuery();
+        } else if (passThrough instanceof AuthData) {
+
+        } else if (passThrough instanceof GameData) {
+
+        } else if (passThrough instanceof UserData) {
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+            for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
+                preparedStatement.setString(i, arguments.elementAt(i - 1));
+            }
+            var set = preparedStatement.executeQuery();
+            set.next();
+            Vector<String> output = new Vector<>();
+            Integer id = set.getInt(1);
             output.add(id.toString());
             output.add(set.getString(2));
             output.add(set.getString(3));
