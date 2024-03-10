@@ -122,6 +122,9 @@ public class DataAccess {
     }
 
     public GameData createGame(GameData game) throws DataAccessException {
+        if (game.gameName() == null) {
+            throw new RuntimeException("SERVICE_WAS_REMOVED");
+        }
         String name = game.gameName();
         return database.addGame(name);
     }

@@ -102,7 +102,6 @@ public class MySqlDataAccess {
         return result;
     }
 
-
     public UserData getAccount(String username, String password) throws DataAccessException {
         UserData result = new UserData(null, null, null);
         String statement = "SELECT * FROM user WHERE username COLLATE utf8mb4_bin = ?";
@@ -247,8 +246,27 @@ public class MySqlDataAccess {
         return null;
     }
 
-    public GameData addGame(String name) {
-        return null;
+    public GameData addGame(String name) throws DataAccessException {
+        GameData result = new GameData(null, null, null, null, null);
+        String statement = "INSERT INTO games (gameName,game) VALUES (?,?)";
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(name);
+        var gameInit = new ChessGame();
+        String game = new Gson().toJson(gameInit);
+        arguments.add(game);
+        Vector<String> strGameData;
+        Integer id = null;
+        try {
+            strGameData = execUpdate(result, statement, arguments);
+            String strId = strGameData.elementAt(0);
+            id = Integer.parseInt(strId);
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        result = result.changeGameName(name);
+        result = result.changeGameID(id);
+        return result;
     }
 
     public String joinGame(ChessGame.TeamColor color, String id, String token) throws DataAccessException {
@@ -285,7 +303,15 @@ public class MySqlDataAccess {
             return output;
 
         } else if (passThrough instanceof GameData) {
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+            for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
+                preparedStatement.setString(i, arguments.elementAt(i - 1));
+            }
+            Integer id = preparedStatement.executeUpdate();
+            Vector<String> output = new Vector<>();
+            output.add(id.toString());
 
+            return output;
         } else if (passThrough instanceof UserData) {
             PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
             for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
@@ -332,7 +358,17 @@ public class MySqlDataAccess {
 
             return output;
         } else if (passThrough instanceof GameData) {
-
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+            for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
+                preparedStatement.setString(i, arguments.elementAt(i - 1));
+            }
+            var set = preparedStatement.executeQuery();
+            set.next();
+            Vector<String> output = new Vector<>();
+            Integer id = set.getInt(1);
+            output.add(id.toString());
+            output.add(set.getString(2));
+            return output;
         } else if (passThrough instanceof UserData) {
             PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
             for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {

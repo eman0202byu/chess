@@ -129,4 +129,22 @@ class DaoTests {
         var auth = currTesting.createAuth(userData);
         assertDoesNotThrow(() -> currTesting.validate(auth));
     }
+
+    @Test
+    void addGame() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        assertThrows(RuntimeException.class, () -> currTesting.createGame(new GameData(null, null, null, null, null)));
+    }
+
+    @Test
+    void addGameNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        assertDoesNotThrow(() -> currTesting.createGame(new GameData(null, null, null, "Game", null)));
+    }
+
 }
