@@ -147,4 +147,32 @@ class DaoTests {
         assertDoesNotThrow(() -> currTesting.createGame(new GameData(null, null, null, "Game", null)));
     }
 
+    @Test
+    void getActiveGames() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game1", null));
+        currTesting.createGame(new GameData(null, null, null, "Game2", null));
+        currTesting.createGame(new GameData(null, null, null, "Game3", null));
+
+        assertEquals(5, currTesting.listActive().size());
+    }
+
+    @Test
+    void execActiveGamesNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, "null", null, "Game1", null));
+        currTesting.createGame(new GameData(null, null, "null", "Game2", null));
+        currTesting.createGame(new GameData(null, "null", "null", "Game3", null));
+
+        assertDoesNotThrow(currTesting::listActive);
+    }
+
 }

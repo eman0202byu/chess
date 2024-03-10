@@ -243,7 +243,15 @@ public class MySqlDataAccess {
     }
 
     public Vector<Vector<String>> getActiveGames() throws DataAccessException {
-        return null;
+        String statement = "SELECT id,white,black,gameName FROM games";
+        Vector<Vector<String>> result = new Vector<>();
+        try {
+            result = execActiveGames(statement);
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        return result;
     }
 
     public GameData addGame(String name) throws DataAccessException {
@@ -273,9 +281,20 @@ public class MySqlDataAccess {
         return null;
     }
 
-//    private execActiveGames() throws DataAccessException, SQLException{
-//
-//    }
+    private Vector<Vector<String>> execActiveGames(String statement) throws DataAccessException, SQLException {
+        PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement);
+        ResultSet set = preparedStatement.executeQuery();
+        Vector<Vector<String>> result = new Vector<>();
+        while (set.next()) {
+            Vector<String> row = new Vector<>();
+            row.add(String.valueOf(set.getInt(1)));
+            row.add(set.getString(2));
+            row.add(set.getString(3));
+            row.add(set.getString(4));
+            result.add(row);
+        }
+        return result;
+    }
 
     private Vector<String> execUpdate(Object passThrough, String statement, Vector<String> arguments) throws DataAccessException, SQLException {
         if (passThrough == null) {
