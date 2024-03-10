@@ -147,12 +147,51 @@ public class MySqlDataAccess {
     }
 
     public AuthData createAuth(String username, String key) throws DataAccessException {
-        return null;
+        AuthData result = new AuthData(null, null);
+        String statement = "SELECT * FROM auth WHERE token COLLATE utf8mb4_bin = ?";
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(key);
+        Vector<String> strAuthData = null;
+        try {
+            execQuery(result, statement, arguments);
+            throw new DataAccessException(ALREADY_EXISTS_EXCEPTION);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 0) {
+                statement = "INSERT INTO auth (username, token) VALUES (?,?)";
+                arguments.clear();
+                arguments.add(username);
+                arguments.add(key);
+                try {
+                    strAuthData = execUpdate(result, statement, arguments);
+                } catch (SQLException ex) {
+                    String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+                    throw new DataAccessException(out);
+                }
+
+            } else {
+                String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+                throw new DataAccessException(out);
+            }
+        }
+        result = result.changeAuthToken(strAuthData.elementAt(2));
+        result = result.changeUsername(strAuthData.elementAt(1));
+        return result;
     }
 
     public AuthData killAuth(String key) throws DataAccessException {
+//        AuthData result = new AuthData(null, null);
+//        var strAuthData = auth.get(key);
+//        if (strAuthData == null) {
+//            throw new DataAccessException(NULL_RESULT_EXCEPTION);
+//        } else {
+//            if (auth.remove(key, strAuthData)) {
+//                return result;
+//            } else {
+//                throw new DataAccessException(UNABLE_TO_REMOVE_EXCEPTION);
+//            }
+//        }
         return null;
-
     }
 
     public void killTable(String table) throws DataAccessException {
@@ -168,6 +207,15 @@ public class MySqlDataAccess {
     }
 
     public AuthData getAuth(String token) throws DataAccessException {
+//        AuthData result = new AuthData(null, null);
+//        var strAuthData = auth.get(token);
+//        if (strAuthData == null) {
+//            throw new DataAccessException(NULL_RESULT_EXCEPTION);
+//        } else {
+//            result = result.changeAuthToken(strAuthData.elementAt(0));
+//            result = result.changeUsername(strAuthData.elementAt(1));
+//            return result;
+//        }
         return null;
     }
 
@@ -189,6 +237,24 @@ public class MySqlDataAccess {
             PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
             preparedStatement.executeUpdate();
         } else if (passThrough instanceof AuthData) {
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+            for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
+                preparedStatement.setString(i, arguments.elementAt(i - 1));
+            }
+            preparedStatement.executeUpdate();
+            var set = preparedStatement.getGeneratedKeys();
+            set.next();
+            Integer id = set.getInt(1);
+            String validateStatement = "SELECT * FROM auth WHERE id = '" + id + "'";
+            PreparedStatement valPreparedStatement = DatabaseManager.getConnection().prepareStatement(validateStatement, RETURN_GENERATED_KEYS);
+            set = valPreparedStatement.executeQuery();
+            set.next();
+            Vector<String> output = new Vector<>();
+            output.add(id.toString());
+            output.add(set.getString(2));
+            output.add(set.getString(3));
+
+            return output;
 
         } else if (passThrough instanceof GameData) {
 
@@ -224,7 +290,19 @@ public class MySqlDataAccess {
             PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
             preparedStatement.executeQuery();
         } else if (passThrough instanceof AuthData) {
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+            for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
+                preparedStatement.setString(i, arguments.elementAt(i - 1));
+            }
+            var set = preparedStatement.executeQuery();
+            set.next();
+            Vector<String> output = new Vector<>();
+            Integer id = set.getInt(1);
+            output.add(id.toString());
+            output.add(set.getString(2));
+            output.add(set.getString(3));
 
+            return output;
         } else if (passThrough instanceof GameData) {
 
         } else if (passThrough instanceof UserData) {

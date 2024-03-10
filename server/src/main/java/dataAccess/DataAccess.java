@@ -46,6 +46,9 @@ public class DataAccess {
     }
 
     public AuthData createAuth(UserData user) throws DataAccessException {
+        if (user.username() == null) {
+            throw new RuntimeException("SERVICE_WAS_REMOVED");
+        }
         String username = user.username();
         String key = genAuth(username);
         AuthData result = new AuthData(null, null);

@@ -75,4 +75,20 @@ class DaoTests {
         assertDoesNotThrow(() -> currTesting.getAccount(userData));
     }
 
+    @Test
+    void createAuth() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+        assertThrows(RuntimeException.class, () -> currTesting.createAuth(new UserData(null, null, null)));
+    }
+
+    @Test
+    void createAuthNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        assertDoesNotThrow(() -> currTesting.createAuth(userData));
+    }
+
 }
