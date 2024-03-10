@@ -180,18 +180,30 @@ public class MySqlDataAccess {
     }
 
     public AuthData killAuth(String key) throws DataAccessException {
-//        AuthData result = new AuthData(null, null);
-//        var strAuthData = auth.get(key);
-//        if (strAuthData == null) {
-//            throw new DataAccessException(NULL_RESULT_EXCEPTION);
-//        } else {
-//            if (auth.remove(key, strAuthData)) {
-//                return result;
-//            } else {
-//                throw new DataAccessException(UNABLE_TO_REMOVE_EXCEPTION);
-//            }
-//        }
-        return null;
+        AuthData result = new AuthData(null, null);
+        String statement = "SELECT * FROM auth WHERE token COLLATE utf8mb4_bin = ?";
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(key);
+        Vector<String> strAuthData = null;
+        try {
+            strAuthData = execQuery(result, statement, arguments);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 0) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            } else {
+                String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+                throw new DataAccessException(out);
+            }
+        }
+        statement = "DELETE FROM auth WHERE token COLLATE utf8mb4_bin = ?";
+        try {
+            execUpdate(result, statement, arguments);
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        return result;
     }
 
     public void killTable(String table) throws DataAccessException {

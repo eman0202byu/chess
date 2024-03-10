@@ -91,4 +91,22 @@ class DaoTests {
         assertDoesNotThrow(() -> currTesting.createAuth(userData));
     }
 
+    @Test
+    void killAuth() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        assertThrows(DataAccessException.class, () -> currTesting.killAuth(new AuthData("0", "Jack")));
+    }
+
+    @Test
+    void killAuthNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        assertDoesNotThrow(() -> currTesting.killAuth(currTesting.createAuth(userData)));
+    }
+
 }
