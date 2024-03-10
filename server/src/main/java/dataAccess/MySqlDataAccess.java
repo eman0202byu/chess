@@ -196,9 +196,12 @@ public class MySqlDataAccess {
                 throw new DataAccessException(out);
             }
         }
-        statement = "DELETE FROM auth WHERE token COLLATE utf8mb4_bin = ?";
+        statement = "DELETE FROM auth WHERE token COLLATE utf8mb4_bin = ";
+        arguments.clear();
+        String arg = "'" + key + "'";
+        arguments.add(arg);
         try {
-            execUpdate(result, statement, arguments);
+            execUpdate(null, statement, arguments);
         } catch (SQLException e) {
             String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
             throw new DataAccessException(out);
@@ -219,16 +222,25 @@ public class MySqlDataAccess {
     }
 
     public AuthData getAuth(String token) throws DataAccessException {
-//        AuthData result = new AuthData(null, null);
-//        var strAuthData = auth.get(token);
-//        if (strAuthData == null) {
-//            throw new DataAccessException(NULL_RESULT_EXCEPTION);
-//        } else {
-//            result = result.changeAuthToken(strAuthData.elementAt(0));
-//            result = result.changeUsername(strAuthData.elementAt(1));
-//            return result;
-//        }
-        return null;
+        AuthData result = new AuthData(null, null);
+        String statement = "SELECT * FROM auth WHERE token COLLATE utf8mb4_bin = ?";
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(token);
+        Vector<String> strAuthData = null;
+        try {
+            strAuthData = execQuery(result, statement, arguments);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 0) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            } else {
+//                String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+//                throw new DataAccessException(out);
+            }
+        }
+        result = result.changeAuthToken(strAuthData.elementAt(0));
+        result = result.changeUsername(strAuthData.elementAt(1));
+        return result;
     }
 
     public Vector<Vector<String>> getActiveGames() throws DataAccessException {
@@ -242,6 +254,10 @@ public class MySqlDataAccess {
     public String joinGame(ChessGame.TeamColor color, String id, String token) throws DataAccessException {
         return null;
     }
+
+//    private execActiveGames() throws DataAccessException, SQLException{
+//
+//    }
 
     private Vector<String> execUpdate(Object passThrough, String statement, Vector<String> arguments) throws DataAccessException, SQLException {
         if (passThrough == null) {

@@ -97,6 +97,7 @@ class DaoTests {
         currTesting.killEverything();
 
         currTesting.createUser(userData);
+        currTesting.createAuth(userData);
         assertThrows(DataAccessException.class, () -> currTesting.killAuth(new AuthData("0", "Jack")));
     }
 
@@ -106,7 +107,26 @@ class DaoTests {
         currTesting.killEverything();
 
         currTesting.createUser(userData);
-        assertDoesNotThrow(() -> currTesting.killAuth(currTesting.createAuth(userData)));
+        var auth = currTesting.createAuth(userData);
+        assertDoesNotThrow(() -> currTesting.killAuth(auth));
     }
 
+    @Test
+    void getAuth() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        assertThrows(DataAccessException.class, () -> currTesting.validate(new AuthData(null, null)));
+    }
+
+    @Test
+    void getAuthNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        var auth = currTesting.createAuth(userData);
+        assertDoesNotThrow(() -> currTesting.validate(auth));
+    }
 }

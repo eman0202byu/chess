@@ -209,7 +209,7 @@ public class ChessService {
         }
     }
 
-    private void ValidationCheck(AuthData key) throws DataAccessException {
+    public void ValidationCheck(AuthData key) throws DataAccessException {
         try {
             dataAccess.validate(key);
         } catch (DataAccessException e) {
