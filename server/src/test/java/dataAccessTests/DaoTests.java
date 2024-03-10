@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import service.ChessService;
 import service.ServiceReport;
 
+import java.util.HashSet;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DaoTests {
@@ -162,7 +164,7 @@ class DaoTests {
     }
 
     @Test
-    void execActiveGamesNot() throws DataAccessException {
+    void getActiveGamesNot() throws DataAccessException {
         DataAccess currTesting = new DataAccess();
         currTesting.killEverything();
 
@@ -173,6 +175,58 @@ class DaoTests {
         currTesting.createGame(new GameData(null, "null", "null", "Game3", null));
 
         assertDoesNotThrow(currTesting::listActive);
+    }
+
+    @Test
+    void joinGame() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        currTesting.createUser(userDataDiff);
+        var user1Auth = currTesting.createAuth(userData);
+        var user2Auth = currTesting.createAuth(userDataDiff);
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game1", null));
+        currTesting.createGame(new GameData(null, null, null, "Game2", null));
+        currTesting.createGame(new GameData(null, null, null, "Game3", null));
+        currTesting.joinGame(ChessGame.TeamColor.WHITE, 3, user1Auth);
+        currTesting.joinGame(ChessGame.TeamColor.BLACK, 3, user2Auth);
+        currTesting.joinGame(ChessGame.TeamColor.BLACK, 4, user1Auth);
+        currTesting.joinGame(ChessGame.TeamColor.WHITE, 5, user2Auth);
+        HashSet<GameData> out = new HashSet<>();
+        out.add(new GameData(1, null, null, "Game", null));
+        out.add(new GameData(2, null, null, "Game", null));
+        out.add(new GameData(3, USER, DIFF_USER, "Game1", null));
+        out.add(new GameData(4, null, USER, "Game2", null));
+        out.add(new GameData(5, DIFF_USER, null, "Game3", null));
+
+        assertEquals(out, currTesting.listActive());
+    }
+
+    @Test
+    void joinGameNot() throws DataAccessException {
+        DataAccess currTesting = new DataAccess();
+        currTesting.killEverything();
+
+        currTesting.createUser(userData);
+        currTesting.createUser(userDataDiff);
+        var user1Auth = currTesting.createAuth(userData);
+        var user2Auth = currTesting.createAuth(userDataDiff);
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game", null));
+        currTesting.createGame(new GameData(null, null, null, "Game1", null));
+        currTesting.createGame(new GameData(null, null, null, "Game2", null));
+        currTesting.createGame(new GameData(null, null, null, "Game3", null));
+        currTesting.joinGame(ChessGame.TeamColor.WHITE, 3, user1Auth);
+        currTesting.joinGame(ChessGame.TeamColor.BLACK, 3, user2Auth);
+        currTesting.joinGame(ChessGame.TeamColor.BLACK, 4, user1Auth);
+        currTesting.joinGame(ChessGame.TeamColor.WHITE, 5, user2Auth);
+
+        assertNotEquals(6, currTesting.listActive().size());
+        assertNotEquals(4, currTesting.listActive().size());
+        assertNotEquals(0, currTesting.listActive().size());
     }
 
 }

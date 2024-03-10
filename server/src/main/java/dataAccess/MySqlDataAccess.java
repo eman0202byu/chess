@@ -9,6 +9,7 @@ import model.UserData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.sql.*;
+import java.util.Objects;
 import java.util.Vector;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -278,7 +279,31 @@ public class MySqlDataAccess {
     }
 
     public String joinGame(ChessGame.TeamColor color, String id, String token) throws DataAccessException {
-        return null;
+        String statement;
+        if (color == ChessGame.TeamColor.WHITE) {
+            statement = "UPDATE games SET " + "white" + " = ? WHERE id = ?";
+        } else {
+            statement = "UPDATE games SET " + "black" + " = ? WHERE id = ?";
+        }
+        String name = getAuth(token).username();
+        Integer intID = Integer.parseInt(id);
+        try {
+            id = execJoin(statement, intID, name);
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+        return id;
+    }
+
+    private String execJoin(String statement, Integer id, String name) throws DataAccessException, SQLException {
+        PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
+
+        preparedStatement.setInt(2, id);
+        preparedStatement.setString(1, name);
+
+        Integer outId = preparedStatement.executeUpdate();
+        return outId.toString();
     }
 
     private Vector<Vector<String>> execActiveGames(String statement) throws DataAccessException, SQLException {
