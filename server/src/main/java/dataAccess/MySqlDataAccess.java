@@ -401,10 +401,15 @@ public class MySqlDataAccess {
             for (int i = 1; i <= preparedStatement.getParameterMetaData().getParameterCount(); i++) {
                 preparedStatement.setString(i, arguments.elementAt(i - 1));
             }
-            Integer id = preparedStatement.executeUpdate();
+            int rowsAffected = preparedStatement.executeUpdate();
             Vector<String> output = new Vector<>();
-            output.add(id.toString());
-
+            if (rowsAffected > 0) {
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    int id = generatedKeys.getInt(1);
+                    output.add(String.valueOf(id));
+                }
+            }
             return output;
         } else if (passThrough instanceof UserData) {
             PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement, RETURN_GENERATED_KEYS);
