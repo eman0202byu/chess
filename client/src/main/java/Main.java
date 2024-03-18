@@ -1,4 +1,7 @@
 import chess.*;
+import exception.ResponseException;
+import model.AuthData;
+import serverFacade.ServerFacade;
 import ui.EscapeSequences;
 
 import java.util.HashMap;
@@ -7,6 +10,8 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 public class Main {
+
+    static private ServerFacade facade = new ServerFacade(999999, "404");
 
     static final String LOGGED_OUT = SET_TEXT_COLOR_BLACK + "[LOGGED_OUT] >>> ";
     static final String LOGGED_OUT_REGISTER = SET_TEXT_COLOR_BLUE + "register <USERNAME> <PASSWORD> <EMAIL>" + SET_TEXT_COLOR_BLACK + " - " + SET_TEXT_COLOR_MAGENTA + "to create an account \n" + SET_TEXT_COLOR_BLACK;
@@ -25,6 +30,7 @@ public class Main {
     static final String LOGGED_IN_QUIT = SET_TEXT_COLOR_BLUE + "quit" + SET_TEXT_COLOR_BLACK + " - " + SET_TEXT_COLOR_MAGENTA + "playing chess \n" + SET_TEXT_COLOR_BLACK;
     static final String LOGGED_IN_HELP = SET_TEXT_COLOR_BLUE + "help" + SET_TEXT_COLOR_BLACK + " - " + SET_TEXT_COLOR_MAGENTA + "with possible commands \n" + SET_TEXT_COLOR_BLACK;
     static final String LOGGED_IN_VALID_COMMANDS = LOGGED_IN_CREATE + LOGGED_IN_LIST + LOGGED_IN_JOIN + LOGGED_IN_OBSERVE + LOGGED_IN_LOGOUT + LOGGED_IN_QUIT + LOGGED_IN_HELP;
+
 
     public static void main(String[] args) {
 //        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -62,6 +68,14 @@ public class Main {
                         break;
                     }
                     System.out.println(SET_TEXT_COLOR_YELLOW + "Attempting to Register");
+                    try {
+                        AuthData result = facade.register(parts[1], parts[2], parts[3]);
+                        apiValues.replace("API", result.authToken());
+                    } catch (ResponseException e) {
+                        System.out.println("ERROR: " + e.getMessage());
+                        break;
+                    }
+
                     // Failure message general
                     System.out.println(SET_TEXT_COLOR_RED + "ERROR: FAILURE TO REACH SERVER" + SET_TEXT_COLOR_BLACK);
                     // break
@@ -70,7 +84,6 @@ public class Main {
                     // break
 
                     // Success message
-                    apiValues.replace("API", "RETURNED_STRING");
                     apiValues.replace("USER", parts[1]);
                     apiValues.replace("PASSWORD", parts[2]);
                     apiValues.replace("EMAIL", parts[3]);
