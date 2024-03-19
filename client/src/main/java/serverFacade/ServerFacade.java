@@ -1,5 +1,6 @@
 package serverFacade;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 
@@ -7,6 +8,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.*;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -75,6 +77,14 @@ public class ServerFacade {
         return cleanResult;
     }
 
+
+    public static GameData joinGame(String auth, String strId, ChessGame.TeamColor team) throws ResponseException {
+        var path = "/game";
+        Integer id = Integer.parseInt(strId);
+        ColorAndID body = new ColorAndID(team, id);
+        GameData result = makeRequest("PUT", path, auth, body, GameData.class);
+        return result;
+    }
 
     private static <T> T makeRequest(String method, String path, Object requestHead, Object requestBody, Class<T> responseClass) throws ResponseException {
         try {

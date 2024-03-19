@@ -1,5 +1,6 @@
 package clientTests;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -78,6 +79,18 @@ public class ServerFacadeTests {
         validation.add(new GameData(1, null, null, "one", null));
         validation.add(new GameData(3, null, null, "three", null));
         assertEquals(validation.size(), games.size());
+    }
+
+    @Test
+    void joinGame() throws Exception {
+        String gameName = "Avalon";
+        AuthData auth = facade.register("player1", "password", "p1@email.com");
+        GameData gameData = facade.createGame(auth.authToken(), gameName);
+        facade.joinGame(auth.authToken(), "1", ChessGame.TeamColor.WHITE);
+        Vector<GameData> games = facade.listGames(auth.authToken());
+        Vector<GameData> validation = new Vector<>();
+        validation.add(new GameData(1, "player1", null, gameName, null));
+        assertEquals(validation, games);
     }
 
 

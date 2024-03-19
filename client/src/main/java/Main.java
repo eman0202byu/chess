@@ -169,8 +169,28 @@ public class Main {
                                     System.out.println(SET_TEXT_COLOR_RED + "ERROR: FIRST ARGUMENT IS NOT VALID NUMBER" + SET_TEXT_COLOR_BLACK);
                                     break;
                                 }
+                                ChessGame.TeamColor cleaned;
+                                if (loginParts.length == 2) {
+                                    cleaned = null;
+                                } else if (loginParts[2].toLowerCase().equals("null")) {
+                                    cleaned = null;
+                                } else if (loginParts[2].toLowerCase().equals("white")) {
+                                    cleaned = ChessGame.TeamColor.WHITE;
+                                } else if (loginParts[2].toLowerCase().equals("black")) {
+                                    cleaned = ChessGame.TeamColor.BLACK;
+                                } else {
+                                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: SECOND ARGUMENT IS NOT VALID (WHITE/BLACK/NULL)" + SET_TEXT_COLOR_BLACK);
+                                    break;
+                                }
                                 //Joins Game at given ID, and Color (If Color == null join as observer)
+                                try {
+                                    facade.joinGame(apiValues.get("AUTH"), loginParts[1], cleaned);
+                                } catch (ResponseException e) {
+                                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
+                                    break;
+                                }
                                 // Displays board depending on Color being played.
+
                                 break;
                             case "observe":
                                 if (loginParts.length != 2) {
@@ -184,6 +204,15 @@ public class Main {
                                     break;
                                 }
                                 //Joins game as observer, color = null
+                                try {
+                                    facade.joinGame(apiValues.get("AUTH"), loginParts[1], null);
+                                } catch (ResponseException e) {
+                                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
+                                    break;
+                                }
+                                // Displays board from WHITE perspective.
+                                
+
                                 break;
                             case "logout":
                                 if (loginParts.length != 1) {
