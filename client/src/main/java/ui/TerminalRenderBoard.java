@@ -19,9 +19,9 @@ public class TerminalRenderBoard {
         ChessPiece[][] board = game.getBoard().getBoard();
         String boardWhite = renderWhite(board);
         String boardBlack = renderBlack(board);
-        System.out.print(boardWhite);
-        System.out.println();
         System.out.print(boardBlack);
+        System.out.println();
+        System.out.print(boardWhite);
     }
 
     private String renderWhite(ChessPiece[][] board) {

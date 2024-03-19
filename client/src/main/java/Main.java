@@ -4,6 +4,7 @@ import model.AuthData;
 import model.GameData;
 import serverFacade.ServerFacade;
 import ui.EscapeSequences;
+import ui.TerminalRenderBoard;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -190,7 +191,10 @@ public class Main {
                                     break;
                                 }
                                 // Displays board depending on Color being played.
-
+                                TerminalRenderBoard housingC = new TerminalRenderBoard();
+                                ChessGame currentGameC = new ChessGame();
+                                currentGameC.getBoard().resetBoard();
+                                housingC.renderFromGame(currentGameC);
                                 break;
                             case "observe":
                                 if (loginParts.length != 2) {
@@ -211,8 +215,10 @@ public class Main {
                                     break;
                                 }
                                 // Displays board from WHITE perspective.
-
-
+                                TerminalRenderBoard housingW = new TerminalRenderBoard();
+                                ChessGame currentGameW = new ChessGame();
+                                currentGameW.getBoard().resetBoard();
+                                housingW.renderFromGame(currentGameW);
                                 break;
                             case "logout":
                                 if (loginParts.length != 1) {
