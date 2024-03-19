@@ -1,6 +1,7 @@
 import chess.*;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import serverFacade.ServerFacade;
 import ui.EscapeSequences;
 
@@ -72,16 +73,9 @@ public class Main {
                         AuthData result = facade.register(parts[1], parts[2], parts[3]);
                         apiValues.replace("API", result.authToken());
                     } catch (ResponseException e) {
-                        System.out.println("ERROR: " + e.getMessage());
+                        System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
                         break;
                     }
-
-                    // Failure message general
-                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: FAILURE TO REACH SERVER" + SET_TEXT_COLOR_BLACK);
-                    // break
-                    // Failure message dupe
-                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: USER ALREADY EXISTS" + SET_TEXT_COLOR_BLACK);
-                    // break
 
                     // Success message
                     apiValues.replace("USER", parts[1]);
@@ -100,11 +94,13 @@ public class Main {
                     }
                     if (!registered) {
                         System.out.println(SET_TEXT_COLOR_YELLOW + "Attempting to Login");
-                        // API Login
-
-                        // Failure message
-                        System.out.println(SET_TEXT_COLOR_RED + "ERROR: FAILURE TO REACH SERVER" + SET_TEXT_COLOR_BLACK);
-                        // break
+                        try {
+                            AuthData result = facade.login(parts[1], parts[2]);
+                            apiValues.replace("API", result.authToken());
+                        } catch (ResponseException e) {
+                            System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
+                            break;
+                        }
 
                         // Success message
                         apiValues.replace("AUTH", "RETURNED_STRING");
@@ -124,7 +120,17 @@ public class Main {
                                     System.out.println(SET_TEXT_COLOR_RED + "ERROR: INVALID ARGUMENTS" + SET_TEXT_COLOR_BLACK);
                                     break;
                                 }
-                                //Creates Game returns ID and Name of new game made
+                                System.out.println(SET_TEXT_COLOR_YELLOW + "Creating game..." + SET_TEXT_COLOR_BLACK);
+                                //Creates Game returns ID of new game made
+                                try {
+                                    GameData result = facade.createGame(apiValues.get("AUTH"), parts[1]);
+                                    apiValues.replace("GAME_NAME", parts[1]);
+                                    apiValues.replace("GAME_ID", result.gameID().toString());
+                                } catch (ResponseException e) {
+                                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
+                                    break;
+                                }
+                                System.out.println(SET_TEXT_COLOR_YELLOW + "New Game ID: " + apiValues.get("GAME_ID") + SET_TEXT_COLOR_BLACK);
                                 break;
                             case "list":
                                 if (loginParts.length > 1) {

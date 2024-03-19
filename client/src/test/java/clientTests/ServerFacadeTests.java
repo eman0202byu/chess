@@ -1,9 +1,13 @@
 package clientTests;
 
 import exception.ResponseException;
+import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import serverFacade.ServerFacade;
+
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,6 +50,14 @@ public class ServerFacadeTests {
         facade.register("player1", "password", "p1@email.com");
         var authData = facade.login("player1", "password");
         assertTrue(authData.authToken().length() > 10);
+    }
+
+    @Test
+    void createGame() throws Exception {
+        String gameName = "Avalon";
+        AuthData auth = facade.register("player1", "password", "p1@email.com");
+        GameData gameData = facade.createGame(auth.authToken(), gameName);
+        assertTrue(gameData.gameID() != null);
     }
 
 }

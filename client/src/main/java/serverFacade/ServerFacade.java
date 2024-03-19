@@ -27,33 +27,38 @@ public class ServerFacade {
 
     public static void clear() throws ResponseException {
         var path = "/db";
-        makeRequest("DELETE", path, null, null);
+        makeRequest("DELETE", path, null, null, null);
     }
 
     public static AuthData register(String username, String password, String email) throws ResponseException {
         var path = "/user";
         UserData body = new UserData(username, password, email);
-        AuthData result = makeRequest("POST", path, body, AuthData.class);
+        AuthData result = makeRequest("POST", path, null, body, AuthData.class);
         return result;
     }
 
     public static AuthData login(String username, String password) throws ResponseException {
         var path = "/session";
         UserData body = new UserData(username, password, null);
-        AuthData result = makeRequest("POST", path, body, AuthData.class);
+        AuthData result = makeRequest("POST", path, null, body, AuthData.class);
+        return result;
+    }
+
+    public GameData createGame(String auth, String gameName) throws ResponseException {
+        var path = "/game";
+        GameData body = new GameData(null, null, null, gameName, null);
+        GameData result = makeRequest("POST", path, auth, body, GameData.class);
         return result;
     }
 
 
-    private static <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private static <T> T makeRequest(String method, String path, Object requestHead, Object requestBody, Class<T> responseClass) throws ResponseException {
         try {
-            URL url = (new URI(serverUrl + ":" + port + path)).toURL();
+            URL url = new URL(serverUrl + ":" + port + path);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
-
-            writeBody(request, http);
-            http.connect();
+            writeRequest(requestHead, requestBody, http);
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
@@ -61,10 +66,15 @@ public class ServerFacade {
         }
     }
 
-    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
-        if (request != null) {
-            http.addRequestProperty("Content-Type", "application/json");
-            String reqData = new Gson().toJson(request);
+    private static void writeRequest(Object requestHead, Object requestBody, HttpURLConnection http) throws IOException {
+        if (requestHead != null || requestBody != null) {
+            http.setRequestProperty("Content-Type", "application/json");
+        }
+        if (requestHead instanceof String) {
+            http.setRequestProperty("authorization", (String) requestHead);
+        }
+        if (requestBody != null) {
+            String reqData = new Gson().toJson(requestBody);
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());
             }
@@ -94,4 +104,5 @@ public class ServerFacade {
     private static boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
+
 }
