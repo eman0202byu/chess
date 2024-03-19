@@ -86,6 +86,12 @@ public class ServerFacade {
         return result;
     }
 
+    public static GameData logout(String auth) throws ResponseException {
+        var path = "/session";
+        GameData result = makeRequest("DELETE", path, auth, null, GameData.class);
+        return result;
+    }
+
     private static <T> T makeRequest(String method, String path, Object requestHead, Object requestBody, Class<T> responseClass) throws ResponseException {
         try {
             URL url = new URL(serverUrl + ":" + port + path);

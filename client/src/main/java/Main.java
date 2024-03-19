@@ -211,7 +211,7 @@ public class Main {
                                     break;
                                 }
                                 // Displays board from WHITE perspective.
-                                
+
 
                                 break;
                             case "logout":
@@ -219,11 +219,22 @@ public class Main {
                                     System.out.println(SET_TEXT_COLOR_RED + "ERROR: INVALID ARGUMENTS" + SET_TEXT_COLOR_BLACK);
                                     break;
                                 }
-                                //Failure message
-                                System.out.println(SET_TEXT_COLOR_RED + "ERROR: FAILURE TO REACH SERVER" + SET_TEXT_COLOR_BLACK);
-                                //break
+
+                                try {
+                                    facade.logout(apiValues.get("AUTH"));
+                                } catch (ResponseException e) {
+                                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
+                                    break;
+                                }
+                                apiValues.replace("AUTH", null);
+                                apiValues.replace("USER", null);
+                                apiValues.replace("PASSWORD", null);
+                                apiValues.replace("EMAIL", null);
+                                apiValues.replace("GAME_ID", null);
+                                apiValues.replace("GAME_NAME", null);
+                                apiValues.replace("TEAM", null);
                                 //Success message
-                                System.out.println(SET_TEXT_COLOR_YELLOW + "Logged out " + parts[1] + SET_TEXT_COLOR_BLACK);
+                                System.out.println(SET_TEXT_COLOR_YELLOW + "Logged out " + apiValues.get("USER") + SET_TEXT_COLOR_BLACK);
                                 loggedIn = false;
                                 break;
                             case "quit":
