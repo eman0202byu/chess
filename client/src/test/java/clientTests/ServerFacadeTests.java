@@ -8,7 +8,9 @@ import server.Server;
 import serverFacade.ServerFacade;
 
 import java.util.Objects;
+import java.util.Vector;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ServerFacadeTests {
@@ -59,5 +61,24 @@ public class ServerFacadeTests {
         GameData gameData = facade.createGame(auth.authToken(), gameName);
         assertTrue(gameData.gameID() != null);
     }
+
+    @Test
+    void listGames() throws Exception {
+        AuthData auth = facade.register("player1", "password", "p1@email.com");
+        GameData gameData1 = facade.createGame(auth.authToken(), "one");
+        GameData gameData2 = facade.createGame(auth.authToken(), "two");
+        GameData gameData3 = facade.createGame(auth.authToken(), "three");
+        GameData gameData4 = facade.createGame(auth.authToken(), "four");
+        GameData gameDataOne = facade.createGame(auth.authToken(), "one");
+        Vector<GameData> games = facade.listGames(auth.authToken());
+        Vector<GameData> validation = new Vector<>();
+        validation.add(new GameData(2, null, null, "two", null));
+        validation.add(new GameData(5, null, null, "one", null));
+        validation.add(new GameData(4, null, null, "four", null));
+        validation.add(new GameData(1, null, null, "one", null));
+        validation.add(new GameData(3, null, null, "three", null));
+        assertEquals(validation.size(), games.size());
+    }
+
 
 }

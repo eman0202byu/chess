@@ -3,9 +3,13 @@ package serverFacade;
 import com.google.gson.Gson;
 
 
+import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Vector;
 import java.io.*;
 import java.net.*;
@@ -44,11 +48,31 @@ public class ServerFacade {
         return result;
     }
 
-    public GameData createGame(String auth, String gameName) throws ResponseException {
+    public static GameData createGame(String auth, String gameName) throws ResponseException {
         var path = "/game";
         GameData body = new GameData(null, null, null, gameName, null);
         GameData result = makeRequest("POST", path, auth, body, GameData.class);
         return result;
+    }
+
+    public static Vector<GameData> listGames(String auth) throws ResponseException {
+        var path = "/game";
+        var result = makeRequest("GET", path, auth, null, Map.class);
+        var resultObj = result.get("games");
+        ArrayList resultArray = new ArrayList<>((Collection<LinkedTreeMap>) resultObj);
+        Vector<GameData> cleanResult = new Vector<>();
+        for (Object elem : resultArray) {
+            LinkedTreeMap fixedElem = (LinkedTreeMap) elem;
+            Double doubleId = (Double) fixedElem.get("gameID");
+            Integer intId = (int) Math.floor(doubleId);
+            String white = (String) fixedElem.get("whiteUsername");
+            String black = (String) fixedElem.get("blackUsername");
+            String name = (String) fixedElem.get("gameName");
+
+            GameData push = new GameData(intId, white, black, name, null);
+            cleanResult.add(push);
+        }
+        return cleanResult;
     }
 
 

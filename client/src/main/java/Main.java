@@ -7,6 +7,7 @@ import ui.EscapeSequences;
 
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Vector;
 
 import static ui.EscapeSequences.*;
 
@@ -139,6 +140,23 @@ public class Main {
                                 }
                                 //Lists all games on server organized as the following:
                                 //// (X == index) X. ID, GAME_NAME, WHITE_USER, BLACK_USER
+                                Vector<GameData> result;
+                                try {
+                                    result = facade.listGames(apiValues.get("AUTH"));
+                                } catch (ResponseException e) {
+                                    System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
+                                    break;
+                                }
+                                for (int i = 0; i < result.size(); i++) {
+                                    Integer value = i;
+                                    String push = value.toString() + ": ";
+                                    push = push + "Game ID: " + result.elementAt(i).gameID().toString() + " ";
+                                    push = push + "Game Name: " + result.elementAt(i).gameName() + " ";
+                                    push = push + "White: " + result.elementAt(i).whiteUsername() + " ";
+                                    push = push + "Black: " + result.elementAt(i).blackUsername();
+                                    System.out.println(SET_TEXT_COLOR_YELLOW + push + SET_TEXT_COLOR_BLACK);
+                                }
+
                                 break;
                             case "join":
                                 if (loginParts.length < 2) {
