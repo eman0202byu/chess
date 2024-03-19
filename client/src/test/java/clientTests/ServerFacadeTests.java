@@ -41,4 +41,11 @@ public class ServerFacadeTests {
         assertTrue(authData.authToken().length() > 10);
     }
 
+    @Test
+    void login() throws Exception {
+        facade.register("player1", "password", "p1@email.com");
+        var authData = facade.login("player1", "password");
+        assertTrue(authData.authToken().length() > 10);
+    }
+
 }

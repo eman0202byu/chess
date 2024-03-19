@@ -37,6 +37,14 @@ public class ServerFacade {
         return result;
     }
 
+    public static AuthData login(String username, String password) throws ResponseException {
+        var path = "/session";
+        UserData body = new UserData(username, password, null);
+        AuthData result = makeRequest("POST", path, body, AuthData.class);
+        return result;
+    }
+
+
     private static <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + ":" + port + path)).toURL();
