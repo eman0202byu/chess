@@ -22,6 +22,7 @@ public class TerminalRenderBoard {
         System.out.print(boardBlack);
         System.out.println();
         System.out.print(boardWhite);
+        System.out.println(SET_BG_COLOR_LIGHT_GREY);
     }
 
     private String renderWhite(ChessPiece[][] board) {

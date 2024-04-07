@@ -14,7 +14,7 @@ import static ui.EscapeSequences.*;
 
 public class Main {
 
-    static private ServerFacade facade = new ServerFacade(999999, "404");
+    static private ServerFacade facade = new ServerFacade(8080, "http://localhost");
 
     static final String LOGGED_OUT = SET_TEXT_COLOR_BLACK + "[LOGGED_OUT] >>> ";
     static final String LOGGED_OUT_REGISTER = SET_TEXT_COLOR_BLUE + "register <USERNAME> <PASSWORD> <EMAIL>" + SET_TEXT_COLOR_BLACK + " - " + SET_TEXT_COLOR_MAGENTA + "to create an account \n" + SET_TEXT_COLOR_BLACK;
@@ -73,7 +73,7 @@ public class Main {
                     System.out.println(SET_TEXT_COLOR_YELLOW + "Attempting to Register");
                     try {
                         AuthData result = facade.register(parts[1], parts[2], parts[3]);
-                        apiValues.replace("API", result.authToken());
+                        apiValues.replace("AUTH", result.authToken());
                     } catch (ResponseException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
                         break;
@@ -98,14 +98,13 @@ public class Main {
                         System.out.println(SET_TEXT_COLOR_YELLOW + "Attempting to Login");
                         try {
                             AuthData result = facade.login(parts[1], parts[2]);
-                            apiValues.replace("API", result.authToken());
+                            apiValues.replace("AUTH", result.authToken());
                         } catch (ResponseException e) {
                             System.out.println(SET_TEXT_COLOR_RED + "ERROR: " + e.getMessage() + SET_TEXT_COLOR_BLACK);
                             break;
                         }
 
                         // Success message
-                        apiValues.replace("AUTH", "RETURNED_STRING");
                         apiValues.replace("USER", parts[1]);
                         apiValues.replace("PASSWORD", parts[2]);
                         System.out.println(SET_TEXT_COLOR_YELLOW + "Logged in as " + parts[1] + SET_TEXT_COLOR_BLACK);
@@ -125,7 +124,7 @@ public class Main {
                                 System.out.println(SET_TEXT_COLOR_YELLOW + "Creating game..." + SET_TEXT_COLOR_BLACK);
                                 //Creates Game returns ID of new game made
                                 try {
-                                    GameData result = facade.createGame(apiValues.get("AUTH"), parts[1]);
+                                    GameData result = facade.createGame(apiValues.get("AUTH"), loginParts[1]);
                                     apiValues.replace("GAME_NAME", parts[1]);
                                     apiValues.replace("GAME_ID", result.gameID().toString());
                                 } catch (ResponseException e) {
