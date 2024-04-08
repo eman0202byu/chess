@@ -1,5 +1,4 @@
 package server.websocket;
-//TODO:: FIGURE OUT WHY THIS CRAP WORKS ON EVERYTHING BUT NORMAL CASES. SERIOUSLY, PLEASE HELP, I HAVE BEEN FUSSING ABOUT WITH THIS ABOUT AN HOUR AND I CAN'T FIGURE IT OUT!
 
 import chess.ChessGame;
 import com.google.gson.Gson;
@@ -62,8 +61,13 @@ public class WebSocketHandler {
             result = chessService.reservedSpot(authData, command.playerColor, command.gameID);
             if (result.Status() == StatusCodes.PASS) {
                 ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
-                session.getRemote().sendString(new Gson().toJson(loadGameMessage));
-                connections.broadcast("", gameState.toString());
+                var result1 = new Gson().toJson(loadGameMessage);
+                session.getRemote().sendString(result1);
+                String notification = authData.username() + " has Joined";
+                ServerMessage notificationMessage = new ServerMessage.NotificationMessage(notification);
+                var result2 = new Gson().toJson(notificationMessage);
+                connections.add(authData.authToken(), session);
+                connections.broadcast(authData.authToken(), result2);
             } else {
                 ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
                 session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -97,8 +101,13 @@ public class WebSocketHandler {
         ServiceReport result = chessService.joinGames(authData, null, command.gameID);
         if (result.Status() == StatusCodes.PASS) {
             ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
-            session.getRemote().sendString(new Gson().toJson(loadGameMessage));
-            connections.broadcast("", gameState.toString());
+            var result1 = new Gson().toJson(loadGameMessage);
+            session.getRemote().sendString(result1);
+            String notification = authData.username() + " has Joined";
+            ServerMessage notificationMessage = new ServerMessage.NotificationMessage(notification);
+            var result2 = new Gson().toJson(notificationMessage);
+            connections.add(authData.authToken(), session);
+            connections.broadcast(authData.authToken(), result2);
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));

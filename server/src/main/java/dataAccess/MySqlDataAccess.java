@@ -433,7 +433,7 @@ public class MySqlDataAccess {
 
     public void gameUsernameExist(String username, Integer id) throws DataAccessException {
         GameData result = new GameData(null, null, null, null, null);
-        String finalStatement = "SELECT * FROM games HERE (white = ? OR black = ?) AND id = ?";
+        String finalStatement = "SELECT * FROM games WHERE (white = ? OR black = ?) AND id = ?";
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
