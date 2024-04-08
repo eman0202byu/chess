@@ -25,7 +25,7 @@ public class TerminalRenderBoard {
         System.out.println(SET_BG_COLOR_LIGHT_GREY);
     }
 
-    private String renderWhite(ChessPiece[][] board) {
+    public String renderWhite(ChessPiece[][] board) {
         StringBuilder sb = new StringBuilder();
         Boolean alternator = false;
         for (int i = BOARD_SIZE - 1; i > -1; i--) {
@@ -289,7 +289,7 @@ public class TerminalRenderBoard {
         return output;
     }
 
-    private String renderBlack(ChessPiece[][] board) {
+    public String renderBlack(ChessPiece[][] board) {
         StringBuilder sb = new StringBuilder();
         Boolean alternator = false;
         for (int i = 0; i < 8; i++) {

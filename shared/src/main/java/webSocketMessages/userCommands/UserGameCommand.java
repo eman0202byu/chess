@@ -13,8 +13,9 @@ import java.util.Objects;
  */
 public class UserGameCommand {
 
-    public UserGameCommand(String authToken) {
+    public UserGameCommand(String authToken, CommandType command) {
         this.authToken = authToken;
+        this.commandType = command;
     }
 
     public enum CommandType {

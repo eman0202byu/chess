@@ -1,6 +1,5 @@
 package server.websocket;
 
-import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
@@ -11,7 +10,7 @@ public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
     public void add(String visitorName, Session session, Integer lobbyId) {
-        var connection = new Connection(visitorName, session, lobbyId); // Include lobby ID
+        var connection = new Connection(visitorName, session, lobbyId);
         connections.put(visitorName, connection);
     }
 
@@ -23,7 +22,7 @@ public class ConnectionManager {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (c.lobbyId.equals(senderLobbyId) && !c.visitorName.equals(senderName)) { // Check lobby ID
+                if (c.lobbyId.equals(senderLobbyId) && !c.visitorName.equals(senderName)) {
                     c.send(notification);
                 }
             } else {

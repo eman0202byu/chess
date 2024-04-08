@@ -5,7 +5,12 @@ import model.GameData;
 import serverFacade.ServerFacade;
 import ui.EscapeSequences;
 import ui.TerminalRenderBoard;
+import webSocketMessages.serverMessages.ServerMessage;
+import websocket.Impl;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Vector;
@@ -15,6 +20,16 @@ import static ui.EscapeSequences.*;
 public class Main {
 
     static private ServerFacade facade = new ServerFacade(8080, "http://localhost");
+    static private WebSocketFacade wsFacade;
+
+    static {
+        try {
+            wsFacade = new WebSocketFacade("http://localhost:8080", new Impl());
+        } catch (ResponseException e) {
+            System.out.println(SET_TEXT_COLOR_RED + Arrays.toString(e.getStackTrace()));
+            throw new RuntimeException(e);
+        }
+    }
 
     static final String LOGGED_OUT = SET_TEXT_COLOR_BLACK + "[LOGGED_OUT] >>> ";
     static final String LOGGED_OUT_REGISTER = SET_TEXT_COLOR_BLUE + "register <USERNAME> <PASSWORD> <EMAIL>" + SET_TEXT_COLOR_BLACK + " - " + SET_TEXT_COLOR_MAGENTA + "to create an account \n" + SET_TEXT_COLOR_BLACK;
@@ -34,6 +49,7 @@ public class Main {
     static final String LOGGED_IN_HELP = SET_TEXT_COLOR_BLUE + "help" + SET_TEXT_COLOR_BLACK + " - " + SET_TEXT_COLOR_MAGENTA + "with possible commands \n" + SET_TEXT_COLOR_BLACK;
     static final String LOGGED_IN_VALID_COMMANDS = LOGGED_IN_CREATE + LOGGED_IN_LIST + LOGGED_IN_JOIN + LOGGED_IN_OBSERVE + LOGGED_IN_LOGOUT + LOGGED_IN_QUIT + LOGGED_IN_HELP;
 
+    static final String IN_GAME = SET_TEXT_COLOR_BLACK + "[IN_GAME] >>> ";
 
     public static void main(String[] args) {
 //        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -192,8 +208,99 @@ public class Main {
                                 // Displays board depending on Color being played.
                                 TerminalRenderBoard housingC = new TerminalRenderBoard();
                                 ChessGame currentGameC = new ChessGame();
-                                currentGameC.getBoard().resetBoard();
-                                housingC.renderFromGame(currentGameC);
+                                Boolean inGame = true;
+                                while (inGame) {
+                                    String team;
+                                    if (cleaned == null) {
+                                        team = "{OBSERVER} ";
+                                    } else {
+                                        team = "{" + cleaned.toString() + "} ";
+                                    }
+                                    System.out.print(team);
+                                    System.out.print(IN_GAME);
+                                    inputString = scanner.nextLine().trim();
+                                    String[] gameParts = inputString.split(" ", 3); // Split the input by the first space
+                                    String gameCommand = gameParts[0].toLowerCase();
+                                    Integer gameId = Integer.parseInt(loginParts[1]);
+                                    ChessGame.TeamColor currentTeam = cleaned;
+                                    ChessGame myGame = new ChessGame();
+                                    switch (gameCommand) {
+                                        ///Implement, Redraw
+                                        ///Implement, Help
+                                        ///Implement, Observer Leave
+                                        ///Implement, Observer Join
+                                        ///Implement, Player Join
+                                        ///Implement, Player Leave
+                                        ///Implement, Player Resign
+                                        case "join":
+                                            if (currentTeam == ChessGame.TeamColor.WHITE) {
+                                                try {
+                                                    wsFacade.joinPlayer(gameId, ChessGame.TeamColor.WHITE, apiValues.get("AUTH"));
+                                                } catch (ResponseException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                                System.out.print(housingC.renderWhite(myGame.getBoard().getBoard()));
+                                            } else if (currentTeam == ChessGame.TeamColor.BLACK) {
+                                                try {
+                                                    wsFacade.joinPlayer(gameId, ChessGame.TeamColor.BLACK, apiValues.get("AUTH"));
+                                                } catch (ResponseException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                                System.out.print(housingC.renderBlack(myGame.getBoard().getBoard()));
+                                            } else {
+                                                try {
+                                                    wsFacade.joinObserver(gameId, apiValues.get("AUTH"));
+                                                } catch (ResponseException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                                housingC.renderFromGame(myGame);
+                                            }
+                                            break;
+                                        case "redraw":
+                                            if (currentTeam == ChessGame.TeamColor.WHITE) {
+                                                System.out.print(housingC.renderWhite(myGame.getBoard().getBoard()));
+                                            } else if (currentTeam == ChessGame.TeamColor.BLACK) {
+                                                System.out.print(housingC.renderBlack(myGame.getBoard().getBoard()));
+                                            } else {
+                                                housingC.renderFromGame(myGame);
+                                            }
+                                            break;
+                                        case "help":
+                                            String valid = """
+                                                    Currently Implemented:\s
+                                                    Help - display options\s
+                                                    Join - Join your game\s
+                                                    Leave - Leave your game\s
+                                                    Resign - Resign your game\s
+                                                    Redraw - Redraw current board\s
+                                                    """;
+                                            System.out.println(valid);
+                                            break;
+                                        case "leave":
+                                            try {
+                                                wsFacade.leaveGame(gameId, apiValues.get("AUTH"));
+                                            } catch (ResponseException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                            inGame = false;
+                                            break;
+                                        case "resign":
+                                            if (currentTeam != null) {
+                                                try {
+                                                    wsFacade.resignGame(gameId, apiValues.get("AUTH"));
+                                                } catch (ResponseException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            } else {
+                                                System.out.println("INVALID");
+                                            }
+                                            inGame = false;
+                                            break;
+                                        default:
+                                            System.out.println("INVALID_INPUT, TYPE: HELP");
+                                            break;
+                                    }
+                                }
                                 break;
                             case "observe":
                                 if (loginParts.length != 2) {
