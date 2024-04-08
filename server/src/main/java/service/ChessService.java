@@ -106,6 +106,21 @@ public class ChessService {
         return new ServiceReport(StatusCodes.PASS, null);
     }
 
+    public ServiceReport reservedSpot(AuthData authData, ChessGame.TeamColor playerColor, Integer gameID) {
+        String username;
+        try {
+            username = dataAccess.getUser(authData.authToken());
+        } catch (DataAccessException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        try {
+            dataAccess.gameUsernameColor(username, playerColor, gameID.toString());
+        } catch (DataAccessException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        return new ServiceReport(StatusCodes.PASS, null);
+    }
+
     public enum StatusCodes {
         BADREQUEST,
         UNAUTHORIZED,

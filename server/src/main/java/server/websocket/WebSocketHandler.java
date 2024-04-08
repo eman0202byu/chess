@@ -58,9 +58,16 @@ public class WebSocketHandler {
         GameData gameState = new GameData(null, null, null, null, new ChessGame());
         ServiceReport result = chessService.joinGames(authData, command.playerColor, command.gameID);
         if (result.Status() == StatusCodes.ALREADYTAKEN) {
-            ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
-            session.getRemote().sendString(new Gson().toJson(loadGameMessage));
-            connections.broadcast("", gameState.toString());
+            result = chessService.reservedSpot(authData, command.playerColor, command.gameID);
+            if (result.Status() == StatusCodes.PASS) {
+                ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
+                session.getRemote().sendString(new Gson().toJson(loadGameMessage));
+                connections.broadcast("", gameState.toString());
+            } else {
+                ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
+                session.getRemote().sendString(new Gson().toJson(errorMessage));
+                connections.broadcast("", "ERROR: Failure to joinGame");
+            }
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -87,7 +94,7 @@ public class WebSocketHandler {
 
         GameData gameState = new GameData(null, null, null, null, new ChessGame());
         ServiceReport result = chessService.joinGames(authData, null, command.gameID);
-        if (result.Status() == StatusCodes.ALREADYTAKEN) {
+        if (result.Status() == StatusCodes.PASS) {
             ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
             session.getRemote().sendString(new Gson().toJson(loadGameMessage));
             connections.broadcast("", gameState.toString());

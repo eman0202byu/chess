@@ -160,4 +160,8 @@ public class DataAccess {
     public void gameUsernameExist(String username, Integer id) throws DataAccessException {
         database.gameUsernameExist(username, id);
     }
+
+    public void gameUsernameColor(String username, ChessGame.TeamColor playerColor, String gameID) throws DataAccessException {
+        database.gameUsernameColor(username, playerColor, gameID);
+    }
 }

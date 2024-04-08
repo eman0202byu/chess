@@ -278,6 +278,42 @@ public class MySqlDataAccess {
         return result;
     }
 
+    public void gameUsernameColor(String username, ChessGame.TeamColor color, String id) throws DataAccessException {
+        if (color == ChessGame.TeamColor.WHITE) {
+            try {
+                String finalStatement = "SELECT white FROM games WHERE id = ? AND white = ?";
+                PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+                preparedStatement.setInt(1, Integer.parseInt(id));
+                preparedStatement.setString(2, username);
+                var set = preparedStatement.executeQuery();
+                set.next();
+                String output = set.getString(1);
+                if (output == null) {
+                    throw new DataAccessException(NULL_RESULT_EXCEPTION);
+                }
+            } catch (SQLException e) {
+                throw new DataAccessException("SQL_ERROR");
+            }
+        } else if (color == ChessGame.TeamColor.BLACK) {
+            try {
+                String finalStatement = "SELECT black FROM games WHERE id = ? AND black = ?";
+                PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+                preparedStatement.setInt(1, Integer.parseInt(id));
+                preparedStatement.setString(2, username);
+                var set = preparedStatement.executeQuery();
+                set.next();
+                String output = set.getString(1);
+                if (output == null) {
+                    throw new DataAccessException(NULL_RESULT_EXCEPTION);
+                }
+            } catch (SQLException e) {
+                throw new DataAccessException("SQL_ERROR");
+            }
+        } else {
+            throw new DataAccessException(INVALID_TYPING_IN_CODE);
+        }
+    }
+
     public String joinGame(ChessGame.TeamColor color, String id, String token) throws DataAccessException {
         String statement;
         if (color == ChessGame.TeamColor.WHITE) {
