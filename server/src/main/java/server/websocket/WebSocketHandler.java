@@ -66,8 +66,8 @@ public class WebSocketHandler {
                 String notification = "Player has joined";
                 ServerMessage notificationMessage = new ServerMessage.NotificationMessage(notification);
                 var result2 = new Gson().toJson(notificationMessage);
-                connections.add(authData.authToken(), session);
-                connections.broadcast(authData.authToken(), result2);
+                connections.add(authData.authToken(), session, command.gameID);
+                connections.broadcast(authData.authToken(), command.gameID, result2);
             } else {
                 ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
                 session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -103,8 +103,8 @@ public class WebSocketHandler {
             String notification = "Observer has joined";
             ServerMessage notificationMessage = new ServerMessage.NotificationMessage(notification);
             var result2 = new Gson().toJson(notificationMessage);
-            connections.add(authData.authToken(), session);
-            connections.broadcast(authData.authToken(), result2);
+            connections.add(authData.authToken(), session, command.gameID);
+            connections.broadcast(authData.authToken(), command.gameID, result2);
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -135,10 +135,10 @@ public class WebSocketHandler {
             session.getRemote().sendString(result1);
             ServerMessage notificationMessage = new ServerMessage.LoadGameMessage(gameState);
             var result2 = new Gson().toJson(notificationMessage);
-            connections.broadcast(authData.authToken(), result2);
+            connections.broadcast(authData.authToken(), command.gameID, result2);
             ServerMessage notificationMessages = new ServerMessage.NotificationMessage("Move Made");
             var result3 = new Gson().toJson(notificationMessages);
-            connections.broadcast(authData.authToken(), result3);
+            connections.broadcast(authData.authToken(), command.gameID, result3);
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to make the move");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -167,7 +167,7 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(successMessage));
             ServerMessage notificationMessages = new ServerMessage.NotificationMessage("Player has left");
             var result3 = new Gson().toJson(notificationMessages);
-            connections.broadcast(authData.authToken(), result3);
+            connections.broadcast(authData.authToken(), command.gameID, result3);
             session.close();
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to leave the game");
@@ -196,6 +196,8 @@ public class WebSocketHandler {
             // Send a success message indicating the user resigned from the game
             ServerMessage successMessage = new ServerMessage.NotificationMessage("You have resigned from the game");
             session.getRemote().sendString(new Gson().toJson(successMessage));
+            ServerMessage notification = new ServerMessage.NotificationMessage("A user has resigned");
+            connections.broadcast(authToken, command.gameID, new Gson().toJson(notification));
         } else {
             // Send an error message upon failure to resign from the game
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to resign from the game");

@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String visitorName, Session session) {
-        var connection = new Connection(visitorName, session);
+    public void add(String visitorName, Session session, Integer lobbyId) {
+        var connection = new Connection(visitorName, session, lobbyId); // Include lobby ID
         connections.put(visitorName, connection);
     }
 
@@ -19,11 +19,11 @@ public class ConnectionManager {
         connections.remove(visitorName);
     }
 
-    public void broadcast(String excludeVisitorName, String notification) throws IOException {
+    public void broadcast(String senderName, Integer senderLobbyId, String notification) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
+                if (c.lobbyId.equals(senderLobbyId) && !c.visitorName.equals(senderName)) { // Check lobby ID
                     c.send(notification);
                 }
             } else {

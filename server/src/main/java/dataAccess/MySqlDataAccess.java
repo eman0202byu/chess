@@ -431,6 +431,19 @@ public class MySqlDataAccess {
         }
     }
 
+    public void replaceGame(String game, String id) throws DataAccessException {
+        try {
+            String finalStatement = "UPDATE games SET game = ? WHERE id = ?";
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.setString(1, game);
+            preparedStatement.setInt(2, Integer.parseInt(id));
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+    }
+
     public void gameUsernameExist(String username, Integer id) throws DataAccessException {
         GameData result = new GameData(null, null, null, null, null);
         String finalStatement = "SELECT * FROM games WHERE (white = ? OR black = ?) AND id = ?";
@@ -626,4 +639,5 @@ public class MySqlDataAccess {
         }
         return null;
     }
+
 }

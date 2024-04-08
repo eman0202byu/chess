@@ -1,5 +1,6 @@
 package dataAccess;
 
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -163,5 +164,9 @@ public class DataAccess {
 
     public void gameUsernameColor(String username, ChessGame.TeamColor playerColor, String gameID) throws DataAccessException {
         database.gameUsernameColor(username, playerColor, gameID);
+    }
+
+    public void replaceGame(ChessGame currentGame, String id) throws DataAccessException {
+        database.replaceGame(new Gson().toJson(currentGame), id);
     }
 }

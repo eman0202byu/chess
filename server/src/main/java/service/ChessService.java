@@ -45,8 +45,20 @@ public class ChessService {
             ChessGame.TeamColor current = chessPiece.getTeamColor();
             if (current != currentGame.getTeamTurn()) {
                 throw new InvalidMoveException();
+            } else if ("black".equals(username)) {
+                throw new InvalidMoveException();
+            }
+            if (currentGame.isInCheckmate(ChessGame.TeamColor.BLACK) || currentGame.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                throw new InvalidMoveException();
+            } else if (currentGame.isInStalemate(ChessGame.TeamColor.BLACK) || currentGame.isInStalemate(ChessGame.TeamColor.WHITE)) {
+                throw new InvalidMoveException();
             }
             currentGame.makeMove(move);
+            try {
+                dataAccess.replaceGame(currentGame, gameID.toString());
+            } catch (DataAccessException e) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+            }
         } catch (InvalidMoveException e) {
             return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
         }
@@ -81,17 +93,6 @@ public class ChessService {
     }
 
     public ServiceReport resignGame(AuthData authData, Integer gameID) {
-        try {
-            dataAccess.killGame(gameID.toString());
-        } catch (DataAccessException e) {
-            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
-                return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
-            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
-                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
-            } else {
-                return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
-            }
-        }
         String username;
         try {
             username = dataAccess.getUser(authData.authToken());
@@ -102,6 +103,17 @@ public class ChessService {
             dataAccess.gameUsernameExist(username, gameID);
         } catch (DataAccessException e) {
             return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        try {
+            dataAccess.killGame(gameID.toString());
+        } catch (DataAccessException e) {
+            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+            } else {
+                return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
+            }
         }
         return new ServiceReport(StatusCodes.PASS, null);
     }
