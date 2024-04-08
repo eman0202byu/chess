@@ -172,16 +172,16 @@ public class WebSocketHandler {
             return;
         }
 
-        //TODO::IMPLEMENT:: ServiceReport result = chessService.resignGame(authData, command.gameID);
-//        if (result.Status() == ChessService.StatusCodes.PASS) {
-//            // Send a success message indicating the user resigned from the game
-//            ServerMessage successMessage = new ServerMessage.NotificationMessage("You have resigned from the game");
-//            session.getRemote().sendString(new Gson().toJson(successMessage));
-//        } else {
-//            // Send an error message upon failure to resign from the game
-//            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to resign from the game");
-//            session.getRemote().sendString(new Gson().toJson(errorMessage));
-//            connections.broadcast("", "ERROR: Failure to resign from game");
-//        }
+        ServiceReport result = chessService.resignGame(authData, command.gameID);
+        if (result.Status() == ChessService.StatusCodes.PASS) {
+            // Send a success message indicating the user resigned from the game
+            ServerMessage successMessage = new ServerMessage.NotificationMessage("You have resigned from the game");
+            session.getRemote().sendString(new Gson().toJson(successMessage));
+        } else {
+            // Send an error message upon failure to resign from the game
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to resign from the game");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to resign from game");
+        }
     }
 }

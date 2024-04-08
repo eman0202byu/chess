@@ -395,6 +395,57 @@ public class MySqlDataAccess {
         }
     }
 
+    public void gameUsernameExist(String username, Integer id) throws DataAccessException {
+        GameData result = new GameData(null, null, null, null, null);
+        String finalStatement = "SELECT * FROM games HERE (white = ? OR black = ?) AND id = ?";
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, username);
+            preparedStatement.setInt(3, id);
+            var set = preparedStatement.executeQuery();
+            set.next();
+            String output = set.getString(1);
+            if (output == null) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            }
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+
+    }
+
+    public void killGame(String id) throws DataAccessException {
+        GameData result = new GameData(null, null, null, null, null);
+        String statement = "SELECT * FROM games WHERE id COLLATE utf8mb4_bin = ?";
+        Vector<String> arguments = new Vector<String>();
+        arguments.add(id);
+        Vector<String> strAuthData = null;
+        try {
+            strAuthData = execQuery(result, statement, arguments);
+        } catch (SQLException e) {
+            var check = e.getErrorCode();
+            if (check == 0) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            } else {
+                String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+                throw new DataAccessException(out);
+            }
+        }
+        statement = "DELETE FROM games WHERE id COLLATE utf8mb4_bin = ";
+        arguments.clear();
+        String arg = "'" + id + "'";
+        arguments.add(arg);
+        try {
+            execUpdate(null, statement, arguments);
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+    }
+
     private String execJoin(String statement, Integer id, String name) throws DataAccessException, SQLException {
         PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement);
 

@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
@@ -28,7 +29,23 @@ public class ChessService {
             }
         }
         var currentGame = new Gson().fromJson(result, ChessGame.class);
+        String username;
         try {
+            username = dataAccess.getUser(authData.authToken());
+        } catch (DataAccessException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        try {
+            dataAccess.gameUsernameExist(username, gameID);
+        } catch (DataAccessException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        try {
+            ChessPiece chessPiece = currentGame.getBoard().getBoard()[move.getStartPosition().getArrayRow()][move.getStartPosition().getArrayColumn()];
+            ChessGame.TeamColor current = chessPiece.getTeamColor();
+            if (current != currentGame.getTeamTurn()) {
+                throw new InvalidMoveException();
+            }
             currentGame.makeMove(move);
         } catch (InvalidMoveException e) {
             return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
@@ -51,6 +68,21 @@ public class ChessService {
         }
         try {
             dataAccess.removeFromGame(gameID.toString(), result);
+        } catch (DataAccessException e) {
+            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+            } else {
+                return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
+            }
+        }
+        return new ServiceReport(StatusCodes.PASS, null);
+    }
+
+    public ServiceReport resignGame(AuthData authData, Integer gameID) {
+        try {
+            dataAccess.killGame(gameID.toString());
         } catch (DataAccessException e) {
             if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
                 return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());

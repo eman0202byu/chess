@@ -141,6 +141,10 @@ public class DataAccess {
         database.removeFromGame(id, username);
     }
 
+    public void killGame(String id) throws DataAccessException {
+        database.killGame(id);
+    }
+
     public GameData joinGame(ChessGame.TeamColor color, Integer id, AuthData auth) throws DataAccessException {
         String strId = id.toString();
         String token = auth.authToken();
@@ -153,4 +157,7 @@ public class DataAccess {
         }
     }
 
+    public void gameUsernameExist(String username, Integer id) throws DataAccessException {
+        database.gameUsernameExist(username, id);
+    }
 }
