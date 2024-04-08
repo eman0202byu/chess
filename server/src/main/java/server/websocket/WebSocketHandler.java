@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import service.ChessService;
 import service.ChessService.StatusCodes;
 import service.ServiceReport;
@@ -63,7 +64,7 @@ public class WebSocketHandler {
                 ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
                 var result1 = new Gson().toJson(loadGameMessage);
                 session.getRemote().sendString(result1);
-                String notification = authData.username() + " has Joined";
+                String notification = "Player has joined";
                 ServerMessage notificationMessage = new ServerMessage.NotificationMessage(notification);
                 var result2 = new Gson().toJson(notificationMessage);
                 connections.add(authData.authToken(), session);
@@ -103,7 +104,7 @@ public class WebSocketHandler {
             ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
             var result1 = new Gson().toJson(loadGameMessage);
             session.getRemote().sendString(result1);
-            String notification = authData.username() + " has Joined";
+            String notification = "Observer has joined";
             ServerMessage notificationMessage = new ServerMessage.NotificationMessage(notification);
             var result2 = new Gson().toJson(notificationMessage);
             connections.add(authData.authToken(), session);
@@ -132,10 +133,15 @@ public class WebSocketHandler {
             return;
         }
 
+        GameData gameState = new GameData(null, null, null, null, new ChessGame());
         ServiceReport result = chessService.makeMove(authData, command.gameID, command.move);
         if (result.Status() == ChessService.StatusCodes.PASS) {
-            ServerMessage successMessage = new ServerMessage.NotificationMessage("Move made successfully");
-            session.getRemote().sendString(new Gson().toJson(successMessage));
+            ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
+            var result1 = new Gson().toJson(loadGameMessage);
+            session.getRemote().sendString(result1);
+            ServerMessage notificationMessage = new ServerMessage.LoadGameMessage("Move was made");
+            var result2 = new Gson().toJson(notificationMessage);
+            connections.broadcast(authData.authToken(), result2);
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to make the move");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -200,5 +206,10 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             connections.broadcast("", "ERROR: Failure to resign from game");
         }
+    }
+
+    @OnWebSocketError
+    public void onError(Throwable error) {
+        error.printStackTrace();
     }
 }
