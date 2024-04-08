@@ -129,6 +129,10 @@ public class DataAccess {
         return database.addGame(name);
     }
 
+    public String getGame(String id, String token) throws DataAccessException {
+        return database.getGame(id, token);
+    }
+
     public GameData joinGame(ChessGame.TeamColor color, Integer id, AuthData auth) throws DataAccessException {
         String strId = id.toString();
         String token = auth.authToken();

@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import model.*;
@@ -11,6 +13,28 @@ import java.util.Objects;
 
 public class ChessService {
     private DataAccess dataAccess;
+
+    public ServiceReport makeMove(AuthData authData, Integer gameID, ChessMove move) {
+        String result;
+        try {
+            result = dataAccess.getGame(gameID.toString(), authData.authToken());
+        } catch (DataAccessException e) {
+            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+            } else {
+                return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
+            }
+        }
+        var currentGame = new Gson().fromJson(result, ChessGame.class);
+        try {
+            currentGame.makeMove(move);
+        } catch (InvalidMoveException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        return new ServiceReport(StatusCodes.PASS, null);
+    }
 
     public enum StatusCodes {
         BADREQUEST,

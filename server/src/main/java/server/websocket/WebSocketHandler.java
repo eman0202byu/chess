@@ -32,12 +32,13 @@ public class WebSocketHandler {
         switch (command.getCommandType()) {
             case JOIN_PLAYER -> joinGameAsPlayer(command.getAuthString(), session, command);
             case JOIN_OBSERVER -> joinGameAsObserver(command.getAuthString(), session, command);
-            // Add cases for other user game commands like making moves, leaving games, etc.
+            case MAKE_MOVE -> makeMove(command.getAuthString(), session, command);
+            case LEAVE -> leaveGame(command.getAuthString(), session, command);
+            case RESIGN -> resignGame(command.getAuthString(), session, command);
         }
     }
 
     private void joinGameAsPlayer(String authToken, Session session, UserGameCommand command) throws IOException {
-        // Authenticate the user using the provided auth token
         AuthData authData = new AuthData(authToken, null);
         boolean isAuthenticated;
         try {
@@ -48,7 +49,6 @@ public class WebSocketHandler {
         }
 
         if (!isAuthenticated) {
-            // Send an error message indicating authentication failure
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             connections.broadcast("", "ERROR: Failure to authenticate user");
@@ -58,12 +58,10 @@ public class WebSocketHandler {
         GameData gameState = new GameData(null, null, null, null, new ChessGame());
         ServiceReport result = chessService.joinGames(authData, command.playerColor, command.gameID);
         if (result.Status() == StatusCodes.ALREADYTAKEN) {
-            // Send the game state upon successful join
             ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
             session.getRemote().sendString(new Gson().toJson(loadGameMessage));
             connections.broadcast("", gameState.toString());
         } else {
-            // Send an error message upon failure to join
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             connections.broadcast("", "ERROR: Failure to joinGame");
@@ -71,9 +69,120 @@ public class WebSocketHandler {
     }
 
     private void joinGameAsObserver(String authToken, Session session, UserGameCommand command) throws IOException {
-        // Similar to joinGameAsPlayer, but for joining as an observer
-        // Implement this method
+        AuthData authData = new AuthData(authToken, null);
+        boolean isAuthenticated;
+        try {
+            chessService.ValidationCheck(authData);
+            isAuthenticated = true;
+        } catch (DataAccessException e) {
+            isAuthenticated = false;
+        }
+
+        if (!isAuthenticated) {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to authenticate user");
+            return;
+        }
+
+        GameData gameState = new GameData(null, null, null, null, new ChessGame());
+        ServiceReport result = chessService.joinGames(authData, null, command.gameID);
+        if (result.Status() == StatusCodes.ALREADYTAKEN) {
+            ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
+            session.getRemote().sendString(new Gson().toJson(loadGameMessage));
+            connections.broadcast("", gameState.toString());
+        } else {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to joinGame");
+        }
     }
 
-    // Implement methods for other user game commands like making moves, leaving games, etc.
+    private void makeMove(String authToken, Session session, UserGameCommand command) throws IOException {
+        AuthData authData = new AuthData(authToken, null);
+        boolean isAuthenticated;
+        try {
+            chessService.ValidationCheck(authData);
+            isAuthenticated = true;
+        } catch (DataAccessException e) {
+            isAuthenticated = false;
+        }
+
+        if (!isAuthenticated) {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to authenticate user");
+            return;
+        }
+
+        ServiceReport result = chessService.makeMove(authData, command.gameID, command.move);
+        if (result.Status() == ChessService.StatusCodes.PASS) {
+            ServerMessage successMessage = new ServerMessage.NotificationMessage("Move made successfully");
+            session.getRemote().sendString(new Gson().toJson(successMessage));
+        } else {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to make the move");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to make move");
+        }
+    }
+
+    private void leaveGame(String authToken, Session session, UserGameCommand command) throws IOException {
+        AuthData authData = new AuthData(authToken, null);
+        boolean isAuthenticated;
+        try {
+            chessService.ValidationCheck(authData);
+            isAuthenticated = true;
+        } catch (DataAccessException e) {
+            isAuthenticated = false;
+        }
+
+        if (!isAuthenticated) {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to authenticate user");
+            return;
+        }
+
+        //TODO::IMPLEMENT::ServiceReport result = chessService.leaveGame(authData, command.gameID);
+//        if (result.Status() == ChessService.StatusCodes.PASS) {
+//            // Send a success message indicating the user left the game
+//            ServerMessage successMessage = new ServerMessage.NotificationMessage("You have left the game");
+//            session.getRemote().sendString(new Gson().toJson(successMessage));
+//        } else {
+//            // Send an error message upon failure to leave the game
+//            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to leave the game");
+//            session.getRemote().sendString(new Gson().toJson(errorMessage));
+//            connections.broadcast("", "ERROR: Failure to leave game");
+//        }
+    }
+
+    private void resignGame(String authToken, Session session, UserGameCommand command) throws IOException {
+        AuthData authData = new AuthData(authToken, null);
+        boolean isAuthenticated;
+        try {
+            chessService.ValidationCheck(authData);
+            isAuthenticated = true;
+        } catch (DataAccessException e) {
+            isAuthenticated = false;
+        }
+
+        if (!isAuthenticated) {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to authenticate user");
+            return;
+        }
+
+        //TODO::IMPLEMENT:: ServiceReport result = chessService.resignGame(authData, command.gameID);
+//        if (result.Status() == ChessService.StatusCodes.PASS) {
+//            // Send a success message indicating the user resigned from the game
+//            ServerMessage successMessage = new ServerMessage.NotificationMessage("You have resigned from the game");
+//            session.getRemote().sendString(new Gson().toJson(successMessage));
+//        } else {
+//            // Send an error message upon failure to resign from the game
+//            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to resign from the game");
+//            session.getRemote().sendString(new Gson().toJson(errorMessage));
+//            connections.broadcast("", "ERROR: Failure to resign from game");
+//        }
+    }
 }

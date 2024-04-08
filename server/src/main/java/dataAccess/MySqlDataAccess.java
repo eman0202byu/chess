@@ -344,6 +344,24 @@ public class MySqlDataAccess {
         return id;
     }
 
+    public String getGame(String id, String token) throws DataAccessException {
+        try {
+            String finalStatement = "SELECT game FROM games WHERE id = ?";
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.setInt(1, Integer.parseInt(id));
+            var set = preparedStatement.executeQuery();
+            set.next();
+            String output = set.getString(1);
+            if (output == null) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            }
+            return output;
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+    }
+
     private String execJoin(String statement, Integer id, String name) throws DataAccessException, SQLException {
         PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement);
 
