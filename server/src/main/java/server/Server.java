@@ -4,6 +4,7 @@ import java.util.*;
 
 import dataAccess.DataAccessException;
 import model.*;
+import server.websocket.WebSocketHandler;
 import service.*;
 import spark.*;
 import com.google.gson.Gson;
@@ -13,10 +14,12 @@ public class Server {
     private final ChessService service;
     private final String AUTHTOKENHEADER = "authorization";
     private final String MAPOFGAMEKEY = "games";
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         try {
             service = new ChessService();
+            webSocketHandler = new WebSocketHandler();
         } catch (DataAccessException e) {
             System.out.println(e.getMessage());
             throw new RuntimeException(e);
@@ -27,6 +30,7 @@ public class Server {
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
 
+        Spark.webSocket("/connect", webSocketHandler);
 
         // Clear application endpoint
         Spark.delete("/db", this::clearDatabase);
