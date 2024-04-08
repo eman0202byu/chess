@@ -143,17 +143,16 @@ public class WebSocketHandler {
             return;
         }
 
-        //TODO::IMPLEMENT::ServiceReport result = chessService.leaveGame(authData, command.gameID);
-//        if (result.Status() == ChessService.StatusCodes.PASS) {
-//            // Send a success message indicating the user left the game
-//            ServerMessage successMessage = new ServerMessage.NotificationMessage("You have left the game");
-//            session.getRemote().sendString(new Gson().toJson(successMessage));
-//        } else {
-//            // Send an error message upon failure to leave the game
-//            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to leave the game");
-//            session.getRemote().sendString(new Gson().toJson(errorMessage));
-//            connections.broadcast("", "ERROR: Failure to leave game");
-//        }
+        ServiceReport result = chessService.leaveGame(authData, command.gameID);
+        if (result.Status() == ChessService.StatusCodes.PASS) {
+            ServerMessage successMessage = new ServerMessage.NotificationMessage("You have left the game");
+            session.getRemote().sendString(new Gson().toJson(successMessage));
+            session.close();
+        } else {
+            ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to leave the game");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            connections.broadcast("", "ERROR: Failure to leave game");
+        }
     }
 
     private void resignGame(String authToken, Session session, UserGameCommand command) throws IOException {

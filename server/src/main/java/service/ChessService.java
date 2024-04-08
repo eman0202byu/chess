@@ -36,6 +36,33 @@ public class ChessService {
         return new ServiceReport(StatusCodes.PASS, null);
     }
 
+    public ServiceReport leaveGame(AuthData authData, Integer gameID) {
+        String result;
+        try {
+            result = dataAccess.getUser(authData.authToken());
+        } catch (DataAccessException e) {
+            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+            } else {
+                return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
+            }
+        }
+        try {
+            dataAccess.removeFromGame(gameID.toString(), result);
+        } catch (DataAccessException e) {
+            if (Objects.equals(e.getMessage(), dataAccess.DB_ALREADY_EXISTS_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.ALREADYTAKEN, e.getMessage());
+            } else if (Objects.equals(e.getMessage(), dataAccess.DB_NULL_RESULT_EXCEPTION)) {
+                return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+            } else {
+                return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
+            }
+        }
+        return new ServiceReport(StatusCodes.PASS, null);
+    }
+
     public enum StatusCodes {
         BADREQUEST,
         UNAUTHORIZED,

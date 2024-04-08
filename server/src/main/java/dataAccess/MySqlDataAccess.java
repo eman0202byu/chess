@@ -362,6 +362,39 @@ public class MySqlDataAccess {
         }
     }
 
+    public String getUsername(String token) throws DataAccessException {
+        try {
+            String finalStatement = "SELECT username FROM auth WHERE token = ?";
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.setString(1, token);
+            var set = preparedStatement.executeQuery();
+            set.next();
+            String output = set.getString(1);
+            if (output == null) {
+                throw new DataAccessException(NULL_RESULT_EXCEPTION);
+            }
+            return output;
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execQuery :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+    }
+
+    public void removeFromGame(String id, String username) throws DataAccessException {
+        try {
+            String finalStatement = "DELETE FROM games WHERE (white = ? OR black = ?) AND id = ?";
+            PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(finalStatement);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, username);
+            Integer intId = Integer.parseInt(id);
+            preparedStatement.setInt(3, intId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            String out = "FATAL_ERROR::MYSqlDAO::execUpdate :: " + e.getMessage();
+            throw new DataAccessException(out);
+        }
+    }
+
     private String execJoin(String statement, Integer id, String name) throws DataAccessException, SQLException {
         PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(statement);
 

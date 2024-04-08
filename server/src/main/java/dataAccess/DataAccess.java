@@ -133,6 +133,14 @@ public class DataAccess {
         return database.getGame(id, token);
     }
 
+    public String getUser(String token) throws DataAccessException {
+        return database.getUsername(token);
+    }
+
+    public void removeFromGame(String id, String username) throws DataAccessException {
+        database.removeFromGame(id, username);
+    }
+
     public GameData joinGame(ChessGame.TeamColor color, Integer id, AuthData auth) throws DataAccessException {
         String strId = id.toString();
         String token = auth.authToken();
