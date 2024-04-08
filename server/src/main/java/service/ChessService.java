@@ -92,6 +92,17 @@ public class ChessService {
                 return new ServiceReport(StatusCodes.DATAACCESSFAILURE, e.getMessage());
             }
         }
+        String username;
+        try {
+            username = dataAccess.getUser(authData.authToken());
+        } catch (DataAccessException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
+        try {
+            dataAccess.gameUsernameExist(username, gameID);
+        } catch (DataAccessException e) {
+            return new ServiceReport(StatusCodes.BADREQUEST, e.getMessage());
+        }
         return new ServiceReport(StatusCodes.PASS, null);
     }
 
