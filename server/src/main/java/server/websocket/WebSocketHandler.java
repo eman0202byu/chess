@@ -52,7 +52,6 @@ public class WebSocketHandler {
         if (!isAuthenticated) {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to authenticate user");
             return;
         }
 
@@ -72,12 +71,10 @@ public class WebSocketHandler {
             } else {
                 ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
                 session.getRemote().sendString(new Gson().toJson(errorMessage));
-                connections.broadcast("", "ERROR: Failure to joinGame");
             }
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to joinGame");
         }
     }
 
@@ -94,7 +91,6 @@ public class WebSocketHandler {
         if (!isAuthenticated) {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to authenticate user");
             return;
         }
 
@@ -112,7 +108,6 @@ public class WebSocketHandler {
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to join the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to joinGame");
         }
     }
 
@@ -129,7 +124,6 @@ public class WebSocketHandler {
         if (!isAuthenticated) {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to authenticate user");
             return;
         }
 
@@ -139,13 +133,15 @@ public class WebSocketHandler {
             ServerMessage loadGameMessage = new ServerMessage.LoadGameMessage(gameState);
             var result1 = new Gson().toJson(loadGameMessage);
             session.getRemote().sendString(result1);
-            ServerMessage notificationMessage = new ServerMessage.LoadGameMessage("Move was made");
+            ServerMessage notificationMessage = new ServerMessage.LoadGameMessage(gameState);
             var result2 = new Gson().toJson(notificationMessage);
             connections.broadcast(authData.authToken(), result2);
+            ServerMessage notificationMessages = new ServerMessage.NotificationMessage("Move Made");
+            var result3 = new Gson().toJson(notificationMessages);
+            connections.broadcast(authData.authToken(), result3);
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to make the move");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to make move");
         }
     }
 
@@ -162,7 +158,6 @@ public class WebSocketHandler {
         if (!isAuthenticated) {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to authenticate user");
             return;
         }
 
@@ -170,11 +165,13 @@ public class WebSocketHandler {
         if (result.Status() == ChessService.StatusCodes.PASS) {
             ServerMessage successMessage = new ServerMessage.NotificationMessage("You have left the game");
             session.getRemote().sendString(new Gson().toJson(successMessage));
+            ServerMessage notificationMessages = new ServerMessage.NotificationMessage("Player has left");
+            var result3 = new Gson().toJson(notificationMessages);
+            connections.broadcast(authData.authToken(), result3);
             session.close();
         } else {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to leave the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to leave game");
         }
     }
 
@@ -191,7 +188,6 @@ public class WebSocketHandler {
         if (!isAuthenticated) {
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Authentication failed");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to authenticate user");
             return;
         }
 
@@ -204,12 +200,6 @@ public class WebSocketHandler {
             // Send an error message upon failure to resign from the game
             ServerMessage errorMessage = new ServerMessage.ErrorMessage("Failed to resign from the game");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
-            connections.broadcast("", "ERROR: Failure to resign from game");
         }
-    }
-
-    @OnWebSocketError
-    public void onError(Throwable error) {
-        error.printStackTrace();
     }
 }
